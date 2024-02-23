@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "telegram_commenting_automation"
+version = "1.0.0"
+description = "Automation for сcommenting on post in channels what you need"
+authors = ["CESSIDY <vrupa1713@gmail.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+pyaes = "1.6.1"
+pyasn1 = "0.4.8"
+rsa = "4.8"
+Telethon = "1.24.0"
+
+[tool.poetry.dev-dependencies]
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

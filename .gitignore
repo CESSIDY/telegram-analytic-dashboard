@@ -1,3 +1,21 @@
+.config.ini
+/.*.ini
+*.session
+
+# configuration files
+/.ssl
+.env*
+!.env.example
+src/config/*.yaml
+!src/config/*.example.yaml
+src/config/*/*.yaml
+!src/config/*/*.example.yaml
+
+src/.cookies
+
+# login lock files
+/src/locks/*.*
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

@@ -1,0 +1,10 @@
+[
+  {
+    "id": "some_channel_hash_id_1",
+    "private": false
+  },
+  {
+    "id": "some_channel_hash_id_2",
+    "private": true
+  }
+]

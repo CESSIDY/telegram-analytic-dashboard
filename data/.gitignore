@@ -1,0 +1,6 @@
+/accounts/*.json
+/channels/*.json
+/comments/*.json
+/accounts_*/
+/channels_*/
+/comments_*/
