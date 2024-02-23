@@ -1,6 +1,8 @@
 import logging
 import os
+
 from telethon.sync import TelegramClient
+
 from loaders.accounts import JsonAccountsLoader
 from loaders.channels import JsonChannelsLoader
 from models import AccountsLoaderModel
@@ -37,6 +39,7 @@ def init_sessions(account_models: [AccountsLoaderModel]) -> [AccountsLoaderModel
 
 def run_and_return_client(account_model: AccountsLoaderModel):
     session_path = os.path.join(session_files_path, account_model.username)
+    logger.info(f"Session path: {session_path}")
 
     proxy = get_proxy_configurations()
     if proxy:
@@ -50,14 +53,13 @@ def run_and_return_client(account_model: AccountsLoaderModel):
 
 def run_channels_scraper_for_each_account(account_models: [AccountsLoaderModel]):
     channels_loader = JsonChannelsLoader()
-    scraper_adapter = None  # TODO
     storage_adapter = None  # TODO
 
     for account_model in account_models:
         print(f"Start processing for {account_model.username}")
         client = run_and_return_client(account_model)
 
-        scraper = ChannelsScraper(client, channels_loader, scraper_adapter, storage_adapter)
+        scraper = ChannelsScraper(client, channels_loader, storage_adapter)
         scraper.run_until_complete()
 
         client.disconnect()

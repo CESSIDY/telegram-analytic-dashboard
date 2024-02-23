@@ -35,7 +35,7 @@ class JsonChannelsLoader(BaseChannelsLoader):
     def _get_channels_from_json_files(json_files: list) -> List[dict]:
         channels_list = []
         for json_file in json_files:
-            with open(json_file, "r") as file:
+            with open(json_file, "r", encoding="utf-8") as file:
                 json_channels = file.read()
                 channels = json.loads(json_channels)
                 channels_list.extend(channels)

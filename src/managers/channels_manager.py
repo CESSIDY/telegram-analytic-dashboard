@@ -1,9 +1,11 @@
+import logging
+
 from telethon.tl import functions, types
 from telethon import tl
 from telethon.tl.types import ChatInviteAlready, ChatInvite
-import logging
 from telethon.tl.functions.messages import CheckChatInviteRequest
 from telethon.errors import InviteHashExpiredError
+
 from loaders.channels import BaseChannelsLoader
 
 
@@ -33,7 +35,8 @@ class ChannelsManager:
         return channels_list
 
     async def get_private_channel(self, channel_info):
-        channel = None
+        if channel := await self.get_chat_obj(channel_info.id):
+            return channel
 
         try:
             # Try get channel invite object by hash_id

@@ -1,12 +1,16 @@
-from telethon.tl import functions, types
-from telethon import tl
+from typing import Generator, List
 import logging
+
+from telethon.tl import functions, types
+from telethon.tl.patched import Message, MessageService
+from telethon import tl
 
 logger = logging.getLogger(__name__)
 
 
 class MessagesManager:
     DISCUSSION_MESSAGES_LIMIT = 1000  # Limit for getting messages from discussion chat for some post
+    POSTS_PER_REQUEST_LIMIT = 1  # TODO: make 10
 
     def __init__(self, client):
         self.client = client
@@ -42,44 +46,39 @@ class MessagesManager:
     def is_message_reply_to_id(message, msg_id):
         return message['reply_to'] and message.get('reply_to', {}).get('reply_to_msg_id', None) == msg_id
 
-    async def get_last_messages(self, channel, limit=10) -> list:
+    async def iter_messages(self, channel, limit=10, offset_msg_id=0) -> Generator[List[Message], None, None]:
         """
-        Get fist (limit) number of messages from channel.
+        Get (limit) number of messages from channel.
 
         :returns tl.types.messages.Messages: Instance of either Messages, MessagesSlice, ChannelMessages, MessagesNotModified.
         """
-        offset_msg = 0
-        all_messages = []
-        limit_per_request = limit
+        total_messages = 0
 
         while True:
             try:
                 history = await self.client(functions.messages.GetHistoryRequest(
                     peer=channel,
-                    offset_id=offset_msg,
+                    offset_id=offset_msg_id,
                     offset_date=None, add_offset=0,
-                    limit=limit_per_request,
+                    limit=self.POSTS_PER_REQUEST_LIMIT,
                     max_id=0,
                     min_id=0,
                     hash=0))
             except Exception as e:
                 logger.error(e)
-                return all_messages
+                yield []
+                return
 
             messages = history.messages
             if not messages:
                 break
 
-            for message in messages:
-                all_messages.append(message.to_dict())
-
-            offset_msg = messages[len(messages) - 1].id
-            total_messages = len(all_messages)
+            offset_msg_id = messages[len(messages) - 1].id
+            total_messages += len(messages)
 
             if limit and total_messages >= limit:
                 break
-
-        return all_messages
+            yield messages
 
     async def get_discussion_message(self, channel_id, message_id) -> tl.types.messages.DiscussionMessage or None:
         """
