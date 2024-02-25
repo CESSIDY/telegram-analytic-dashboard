@@ -9,44 +9,13 @@ logger = logging.getLogger(__name__)
 
 
 class MessagesManager:
-    DISCUSSION_MESSAGES_LIMIT = 1000  # Limit for getting messages from discussion chat for some post
-    POSTS_PER_REQUEST_LIMIT = 1  # TODO: make 10
+    POSTS_PER_REQUEST_LIMIT = 100
 
     def __init__(self, client):
         self.client = client
         self.user_owner = self.client.get_me()
 
-    async def is_commented_post(self, discussion_channel, msg_id):
-        discussion_messages = await self.get_last_messages_for_discussion(discussion_channel, msg_id)
-
-        for message in discussion_messages:
-            if self.is_user_message(message, self.user_owner):
-                return True
-        return False
-
-    @staticmethod
-    def is_user_message(message, user):
-        return user.id == message.get('from_id', {}).get('user_id', None)
-
-    async def get_last_messages_for_discussion(self, discussion_channel, msg_id) -> list:
-        """
-        Get comments for particular message (post) by ID
-
-        :returns tl.types.messages.Messages: Instance of either Messages, MessagesSlice, ChannelMessages, MessagesNotModified.
-        """
-        all_messages = await self.get_last_messages(channel=discussion_channel, limit=self.DISCUSSION_MESSAGES_LIMIT)
-        discussion_messages = list()
-        for message in all_messages:
-            # get comment that are related to particular post by msg_id
-            if self.is_message_reply_to_id(message, msg_id):
-                discussion_messages.append(message)
-        return discussion_messages
-
-    @staticmethod
-    def is_message_reply_to_id(message, msg_id):
-        return message['reply_to'] and message.get('reply_to', {}).get('reply_to_msg_id', None) == msg_id
-
-    async def iter_messages(self, channel, limit=10, offset_msg_id=0) -> Generator[List[Message], None, None]:
+    async def iter_messages(self, channel, limit=10, offset_msg_id=0, reply_to=None) -> Generator[List[Message], None, None]:
         """
         Get (limit) number of messages from channel.
 
@@ -54,30 +23,24 @@ class MessagesManager:
         """
         total_messages = 0
 
-        while True:
+        while total_messages < limit:
             try:
-                history = await self.client(functions.messages.GetHistoryRequest(
-                    peer=channel,
+                messages = await self.client.get_messages(
+                    channel,
                     offset_id=offset_msg_id,
-                    offset_date=None, add_offset=0,
                     limit=self.POSTS_PER_REQUEST_LIMIT,
-                    max_id=0,
-                    min_id=0,
-                    hash=0))
+                    reply_to=reply_to,
+                )
+                if not messages:
+                    break
             except Exception as e:
                 logger.error(e)
                 yield []
                 return
 
-            messages = history.messages
-            if not messages:
-                break
-
             offset_msg_id = messages[len(messages) - 1].id
             total_messages += len(messages)
 
-            if limit and total_messages >= limit:
-                break
             yield messages
 
     async def get_discussion_message(self, channel_id, message_id) -> tl.types.messages.DiscussionMessage or None:

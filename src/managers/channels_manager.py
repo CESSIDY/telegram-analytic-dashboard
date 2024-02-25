@@ -14,11 +14,11 @@ logger = logging.getLogger(__name__)
 
 class ChannelsManager:
     def __init__(self, client, channels_loader_adaptor: BaseChannelsLoader):
-        self.channels_list = self._get_channels_objects(channels_loader_adaptor)
+        self.channels_loader_adaptor = channels_loader_adaptor
         self.client = client
 
     async def get_channels(self):
-        return self.channels_list
+        return await self._get_channels_objects(self.channels_loader_adaptor)
 
     async def _get_channels_objects(self, channels_loader: BaseChannelsLoader) -> list:
         channels_list = list()
