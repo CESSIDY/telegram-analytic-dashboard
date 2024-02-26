@@ -33,4 +33,5 @@ def configure_logging(name="telegram_commentator"):
                         filemode='a',
                         format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s',
                         datefmt='%Y-%m-%d:%H:%M:%S',
-                        level=logging.INFO)
+                        level=logging.INFO,
+                        encoding='UTF-8')
