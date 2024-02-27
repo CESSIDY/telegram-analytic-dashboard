@@ -10,6 +10,9 @@ pyaes = "1.6.1"
 pyasn1 = "0.4.8"
 rsa = "4.8"
 Telethon = "1.34.0"
+pymongo = "^4.6.2"
+mongoengine = "^0.27.0"
+python-dotenv = "^1.0.1"
 
 [tool.poetry.dev-dependencies]
 
