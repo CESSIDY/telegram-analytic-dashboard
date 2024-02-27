@@ -2,6 +2,11 @@ from abc import ABC, abstractmethod
 
 
 class BaseDatabaseHandler(ABC):
+
+    @abstractmethod
+    def store_channel(self, chat_id, chat_name, content):
+        pass
+
     @abstractmethod
     def store_message(self, chat_id, message_id, content):
         pass

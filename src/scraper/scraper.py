@@ -1,4 +1,3 @@
-import json
 import logging
 
 from .auth_scraper import AuthScraper
@@ -15,7 +14,11 @@ class MessagesScraper(AuthScraper):
 
         for channel in channels:
             logger.info(f"Start scraping from channel({channel.title}/{channel.id})")
+            self.scrape_and_store_channel_info(channel)
             await self.scrape_and_store_messages_from_channel(channel)
+
+    def scrape_and_store_channel_info(self, channel):
+        self.db_handler.store_channel(channel.id, channel.title, channel.to_json())
 
     # TODO: add logic for last_message_id because we wanna get messages starting from already grabbed
     async def scrape_and_store_messages_from_channel(self, channel):

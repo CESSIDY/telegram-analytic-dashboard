@@ -4,6 +4,19 @@ import json
 from mongoengine import Document, StringField, DateTimeField
 
 
+class Channel(Document):
+    chat_id = StringField(required=True)
+    name = StringField(required=True)
+    content = StringField(required=True)
+    timestamp = DateTimeField(default=datetime.now, required=True)
+
+    # def set_content(self, content):
+    #     self.content = json.dumps(content)
+    #
+    # def get_content(self):
+    #     return json.loads(self.content)
+
+
 class Message(Document):
     chat_id = StringField(required=True)
     message_id = StringField(required=True, unique=True)

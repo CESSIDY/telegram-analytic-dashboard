@@ -8,6 +8,9 @@ logger = logging.getLogger(__name__)
 
 class DebugDatabaseHandler(BaseDatabaseHandler):
 
+    def store_channel(self, chat_id, chat_name, content):
+        logger.info(f"chat_id: {chat_id} => chat_name: {chat_name} => content: {json.loads(content)}")
+
     def store_message(self, chat_id, message_id, content):
         logger.info(f"chat_id: {chat_id} => message_id: {message_id} => content: {json.loads(content)}")
 
