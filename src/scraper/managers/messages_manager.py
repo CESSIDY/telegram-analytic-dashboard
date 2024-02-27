@@ -9,7 +9,7 @@ logger = logging.getLogger(__name__)
 
 
 class MessagesManager:
-    POSTS_PER_REQUEST_LIMIT = 100
+    MESSAGES_PER_REQUEST_LIMIT = 5#100
 
     def __init__(self, client):
         self.client = client
@@ -28,7 +28,7 @@ class MessagesManager:
                 messages = await self.client.get_messages(
                     channel,
                     offset_id=offset_msg_id,
-                    limit=self.POSTS_PER_REQUEST_LIMIT,
+                    limit=self.MESSAGES_PER_REQUEST_LIMIT,
                     reply_to=reply_to,
                 )
                 if not messages:
@@ -42,17 +42,3 @@ class MessagesManager:
             total_messages += len(messages)
 
             yield messages
-
-    async def get_discussion_message(self, channel_id, message_id) -> tl.types.messages.DiscussionMessage or None:
-        """
-        If channel have discussion chat some messages gonna have they room in this chat,
-        so we cat get discussion object for this message(post)
-        """
-        try:
-            discussion_msg = await self.client(
-                functions.messages.GetDiscussionMessageRequest(peer=channel_id,
-                                                               msg_id=message_id))
-            return discussion_msg
-        except Exception as e:
-            logger.warning(e)
-        return
