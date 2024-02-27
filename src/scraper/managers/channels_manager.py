@@ -1,8 +1,9 @@
 import logging
+from typing import List
 
 from telethon.tl import functions, types
 from telethon import tl
-from telethon.tl.types import ChatInviteAlready, ChatInvite
+from telethon.tl.types import ChatInviteAlready, ChatInvite, Channel
 from telethon.tl.functions.messages import CheckChatInviteRequest
 from telethon.errors import InviteHashExpiredError
 
@@ -17,10 +18,10 @@ class ChannelsManager:
         self.channels_loader_adaptor = channels_loader_adaptor
         self.client = client
 
-    async def get_channels(self):
+    async def get_channels(self) -> List[Channel]:
         return await self._get_channels_objects(self.channels_loader_adaptor)
 
-    async def _get_channels_objects(self, channels_loader: BaseChannelsLoader) -> list:
+    async def _get_channels_objects(self, channels_loader: BaseChannelsLoader) -> List[Channel]:
         channels_list = list()
 
         for channel_info in channels_loader.get_all():
@@ -62,7 +63,7 @@ class ChannelsManager:
 
         return channels_updates.chats[0]
 
-    async def get_public_channel(self, channel_info):
+    async def get_public_channel(self, channel_info) -> Channel:
         channel = await self.get_chat_obj(channel_info.id)
         return channel
 
