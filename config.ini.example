@@ -1,7 +1,0 @@
-[Proxy]
-proxy_enabled=0 or 1
-username=
-password=
-addr=
-port=
-proxy_type= 'socks5' or 'socks4' or 'http'

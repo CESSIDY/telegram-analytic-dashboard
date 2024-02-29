@@ -1,0 +1,50 @@
+version: '3.9'
+networks:
+  general:
+    driver: bridge
+volumes:
+  mongo:
+    driver: local
+
+services:
+  python:
+    build:
+      context: .
+      dockerfile: ./docker/python/Dockerfile
+      args:
+        - 'PYTHON_VERSION=${PYTHON_VERSION}'
+    volumes:
+      - './src:/var/app/src'
+      - './data:/var/app/data'
+      - './.env:/var/app/.env'
+    extra_hosts:
+      - 'dockerhost:${DOCKER_HOST_IP}'
+    depends_on:
+      - mongo
+    ports:
+      - '${PYTHON_PORT}:8080'
+    stdin_open: true
+    tty: true
+    networks:
+      - general
+  mongo:
+    image: mongo
+    restart: always
+    environment:
+      - 'MONGO_INITDB_ROOT_USERNAME=${MONGODB_USERNAME}'
+      - 'MONGO_INITDB_ROOT_PASSWORD=${MONGODB_PASSWORD}'
+    volumes:
+      - '${DATA_PATH_HOST}/mongodb:/data/db'
+    networks:
+      - general
+#  mongo-express:
+#    image: mongo-express
+#    restart: always
+#    ports:
+#      - '${MONGODB_PORT}:8081'
+#    environment:
+#      - 'ME_CONFIG_MONGODB_ADMINUSERNAME=${MONGODB_USERNAME}'
+#      - 'ME_CONFIG_MONGODB_ADMINPASSWORD=${MONGODB_PASSWORD}'
+#      - 'ME_CONFIG_MONGODB_URL=mongodb://${MONGODB_USERNAME}:${MONGODB_PASSWORD}@mongo:27017/'
+#    networks:
+#      - general
