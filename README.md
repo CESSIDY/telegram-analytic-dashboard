@@ -1,6 +1,6 @@
 # TelegramCommentingAutomation
 
-## **Before start:**
+### **Before start:**
 1. add your accounts app to array into /data/accounts/accounts.json (https://core.telegram.org/api/obtaining_api_id):
    
    1.1 `api_id` - api id what can get after registering the Telegram application
@@ -22,12 +22,16 @@ an json file in the desired directory, with any name, the main thing is that the
 4. `config.ini` - in this file you specify the settings, at the moment this is only the proxy setting, 
 and the minimum settings you need to specify here is `proxy_enabled`, if you do not need a proxy then `proxy_enabled = 0`, 
 and if the proxy will be used, specify all settings and `proxy_enabled = 1`;
-   
-After all configurations:
+
+### **Running project(After all configurations)**
+- Manual:
    1. `poetry install`
    1. `cd src`
    2. `poetry run python main.py`
-      
       2.1 then there will be logging in for each account and creating a session files, 
       for each account you need to specify the phone number to which it was registered, and the code what you will receive from telegram;
+- Docker:
+  1. `docker-compose build --force-rm`
+  2. (for session files creating) `docker-compose run --rm python `
+  3. (after creating session files) `docker-compose up -d`
       

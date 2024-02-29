@@ -57,11 +57,15 @@ class ChannelsManager:
             pass
 
         # If invite hash expired than we can try just join to channels by request
-        channels_updates = await self.client(functions.channels.JoinChannelRequest(
-            channel=channel_info.id
-        ))
-
-        return channels_updates.chats[0]
+        try:
+            channels_updates = await self.client(functions.channels.JoinChannelRequest(
+                channel=channel_info.id
+            ))
+            return channels_updates.chats[0]
+        except ValueError as err:
+            logger.warning(f"Can't join channel {channel_info.id}")
+            logger.error(err)
+        return None
 
     async def get_public_channel(self, channel_info) -> Channel:
         channel = await self.get_chat_obj(channel_info.id)
