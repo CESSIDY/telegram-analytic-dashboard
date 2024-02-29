@@ -23,7 +23,7 @@ class MessagesManager:
                 messages = await self.client.get_messages(
                     channel,
                     offset_id=offset_msg_id,
-                    limit=self.MESSAGES_PER_REQUEST_LIMIT,
+                    limit=self.MESSAGES_PER_REQUEST_LIMIT if limit > self.MESSAGES_PER_REQUEST_LIMIT else limit,
                     reply_to=reply_to,
                 )
                 if not messages:

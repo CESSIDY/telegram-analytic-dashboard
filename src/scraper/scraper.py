@@ -6,8 +6,8 @@ logger = logging.getLogger(__name__)
 
 
 class MessagesScraper(AuthScraper):
-    MESSAGES_LIMIT = 1
-    COMMENTS_LIMIT = 100
+    MESSAGES_LIMIT = 2
+    COMMENTS_LIMIT = 3
 
     async def start_scraping(self):
         channels = await self.channels_manager.get_channels()

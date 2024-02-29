@@ -1,28 +1,18 @@
-import configparser
-import os
 import logging
 
-
-def get_configurations() -> dict:
-    config_file_path = os.path.abspath(os.path.join(os.path.realpath(__file__), '..', '..', '..', "config.ini"))
-    config = configparser.ConfigParser()
-    config.read(config_file_path)
-
-    return config
+from . import settings
 
 
 def get_proxy_configurations() -> dict:
     proxy = {}
-    config = get_configurations()
-    is_proxy_enabled = int(config['Proxy']['proxy_enabled'])
 
-    if is_proxy_enabled:
+    if settings.PROXY_ENABLED:
         proxy = {
-            'proxy_type': config['Proxy']['proxy_type'],  # (mandatory) protocol to use
-            'addr': config['Proxy']['addr'],  # (mandatory) proxy IP address
-            'port': config['Proxy']['port'],  # (mandatory) proxy port number
-            'username': config['Proxy']['username'],  # (optional) username if the proxy requires auth
-            'password': config['Proxy']['password'],  # (optional) password if the proxy requires auth
+            'proxy_type': settings.PROXY_TYPE,  # (mandatory) protocol to use
+            'addr': settings.PROXY_ADDRESS,  # (mandatory) proxy IP address
+            'port': settings.PROXY_PORT,  # (mandatory) proxy port number
+            'username': settings.PROXY_USERNAME,  # (optional) username if the proxy requires auth
+            'password': settings.PROXY_PASSWORD,  # (optional) password if the proxy requires auth
             'rdns': True  # (optional) whether to use remote or local resolve, default remote
         }
     return proxy

@@ -1,11 +1,11 @@
 from pymongo import MongoClient
 from pymongo.errors import ConnectionFailure
-from config.settings import MONGODB_URI
+from utils.settings import settings
 
 
 def connect_to_database():
     try:
-        client = MongoClient(MONGODB_URI)
+        client = MongoClient(settings.MONGODB_URI)
         db = client.get_database()
         print("Connected to MongoDB")
         return db
