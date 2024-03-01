@@ -1,11 +1,11 @@
 from datetime import datetime
 import json
 
-from mongoengine import Document, StringField, DateTimeField
+from mongoengine import Document, StringField, DateTimeField, IntField
 
 
 class Channel(Document):
-    chat_id = StringField(required=True)
+    chat_id = IntField(required=True)
     name = StringField(required=True)
     content = StringField(required=True)
     timestamp = DateTimeField(default=datetime.now, required=True)
@@ -18,8 +18,9 @@ class Channel(Document):
 
 
 class Message(Document):
-    chat_id = StringField(required=True)
-    message_id = StringField(required=True, unique=True)
+    # chat = ReferenceField(Channel)
+    chat_id = IntField(required=True)
+    message_id = IntField(required=True, unique=True)
     content = StringField(required=True)
     timestamp = DateTimeField(default=datetime.now, required=True)
 
@@ -31,9 +32,11 @@ class Message(Document):
 
 
 class Comment(Document):
-    chat_id = StringField(required=True)
-    message_id = StringField(required=True)
-    comment_id = StringField(required=True, unique=True)
+    # chat = ReferenceField(Channel)
+    # message = ReferenceField(Message)
+    chat_id = IntField(required=True)
+    message_id = IntField(required=True)
+    comment_id = IntField(required=True, unique=True)
     content = StringField(required=True)
     timestamp = DateTimeField(default=datetime.now, required=True)
 

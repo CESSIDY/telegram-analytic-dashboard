@@ -10,7 +10,7 @@ class Settings:
     MONGODB_USERNAME = os.getenv("MONGODB_USERNAME", "")
     MONGODB_PASSWORD = os.getenv("MONGODB_PASSWORD", "")
     MONGODB_HOST = os.getenv("MONGODB_HOST", "")
-    MONGODB_PORT = os.getenv("MONGODB_PORT", "")
+    MONGODB_PORT = int(os.getenv("MONGODB_PORT", ""))
     MONGODB_DATABASE = os.getenv("MONGODB_DATABASE", "")
 
     MONGODB_URI = f"mongodb://{MONGODB_USERNAME}:{MONGODB_PASSWORD}@{MONGODB_HOST}:{MONGODB_PORT}/{MONGODB_DATABASE}"

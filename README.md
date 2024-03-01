@@ -19,7 +19,7 @@
 _Also if you want to store channel or account in separate files, you can simply create 
 an json file in the desired directory, with any name, the main thing is that the object need to be in the `array[]` -> `[{"...": "...", ...}]`;_ 
 
-4. `config.ini` - in this file you specify the settings, at the moment this is only the proxy setting, 
+4. `.env` - in this file you specify the settings, at the moment this is only the proxy setting, 
 and the minimum settings you need to specify here is `proxy_enabled`, if you do not need a proxy then `proxy_enabled = 0`, 
 and if the proxy will be used, specify all settings and `proxy_enabled = 1`;
 
@@ -34,4 +34,5 @@ and if the proxy will be used, specify all settings and `proxy_enabled = 1`;
   1. `docker-compose build --force-rm`
   2. (for session files creating) `docker-compose run --rm python `
   3. (after creating session files) `docker-compose up -d`
+  4. After the scraper (python container) end working, you have the opportunity to connect to mongo-express to view the collected data (http://localhost:8081/ credentials: admin:pass)
       

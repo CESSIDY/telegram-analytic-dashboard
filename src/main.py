@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 
 
 def main():
-    db_handler = DebugDatabaseHandler()  # DatabaseHandler()
+    db_handler = DatabaseHandler()
     scraper = MessagesScraper(JsonChannelsLoader(), JsonAccountsLoader(), db_handler)
     scraper.run_scraper()
     # # Connect to the database

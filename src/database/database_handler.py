@@ -2,15 +2,19 @@ from datetime import datetime
 
 from database import BaseDatabaseHandler
 from database.models import Message, Comment, Channel
+from database.db_connector import connect_to_database
 
 
 class DatabaseHandler(BaseDatabaseHandler):
+
+    def __init__(self):
+        connect_to_database()
 
     def store_channel(self, chat_id, chat_name, content):
         existing_channel = Channel.objects(chat_id=chat_id).first()
 
         if not existing_channel:
-            channel = Channel(chat_id=chat_id, chat_name=chat_name, content=content, timestamp=datetime.now())
+            channel = Channel(chat_id=chat_id, name=chat_name, content=content, timestamp=datetime.now())
             channel.save()
             print("Channel stored in the database.")
         else:

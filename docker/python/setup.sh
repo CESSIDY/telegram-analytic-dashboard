@@ -1,5 +1,3 @@
-#!/bin/bash
-
 set -eu
 cd /var/app
 
