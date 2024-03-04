@@ -2,7 +2,7 @@ from typing import List
 import logging
 
 import dash
-from dash import dash_table, Input, Output, State, html, dcc, callback
+from dash import dash_table, Input, Output, State, html, dcc, callback, DiskcacheManager, CeleryManager
 import plotly.graph_objs as go
 import dash_daq as daq
 import dash_mantine_components as dmc
@@ -19,6 +19,18 @@ from loaders.channels import JsonChannelsLoader
 from loaders.accounts import JsonAccountsLoader
 
 logger = logging.getLogger(__name__)
+
+if settings.REDIS_URL:
+    # Use Redis & Celery if REDIS_URL set as an env variable
+    from celery import Celery
+    celery_app = Celery(__name__, broker=settings.REDIS_URL, backend=settings.REDIS_URL)
+    background_callback_manager = CeleryManager(celery_app)
+
+else:
+    # Diskcache for non-production apps when developing locally
+    import diskcache
+    cache = diskcache.Cache("./cache")
+    background_callback_manager = DiskcacheManager(cache)
 
 app = dash.Dash(
     __name__,
@@ -58,10 +70,14 @@ def build_banner():
                 children=[
                     html.Div(
                         children=[
-                            html.H6(f"Click on button to run scraping for ({channels_count}) channels"),
-                            html.Button(
-                                id="run-scraping-channels", children="Run scraping", n_clicks=0
-                            )
+                            dcc.Loading(
+                                id="loading-channels",
+                                type="circle",  # or "default"
+                                children=[html.Button(
+                                    id="run-scraping-channels", children=f"Run scraping for ({channels_count}) channels", n_clicks=0
+                                    ),
+                                    html.Div(id="loading-channels-scraping-output")],
+                            ),
                         ],
                         style={"text-align": "center", 'display': 'flex'}
                     ),
@@ -146,7 +162,16 @@ def build_quick_stats_panel(channel_id, messages: List[Message]):
             ),
             html.Div(
                 id="utility-card",
-                children=[html.Button('Run scraping', id='run-scraping-channel', value=f"{channel_id}", n_clicks=0)],
+                children=[
+                    dcc.Loading(
+                        id="loading-channel",
+                        type="circle",  # or "default"
+                        children=[
+                            html.Button('Run scraping', id='run-scraping-channel', value=f"{channel_id}", n_clicks=0),
+                            html.Div(id="loading-channel-scraping-output")],
+                    ),
+
+                ],
             ),
         ],
     )
@@ -280,31 +305,32 @@ def render_tab_content(tab_switch: str):
 
 
 @app.callback(
-    Output("app-content", "children", allow_duplicate=True),
+    [Output("app-content", "children", allow_duplicate=True),
+     Output("loading-channel-scraping-output", "children")],
     [Input("run-scraping-channel", "value"),
      Input("run-scraping-channel", "n_clicks")],
     prevent_initial_call=True
 )
 def run_channel_scraping(channel_id, n_clicks):
     if not n_clicks or n_clicks <= 0:
-        return render_tab_content(f"tab-{channel_id}")
+        return render_tab_content(f"tab-{channel_id}"), None
     logger.info(f"Click on run scraping for channel {channel_id}")
     scraper.run_scraper(int(channel_id))
     logger.info(f"Completed scraping")
-    return render_tab_content(f"tab-{channel_id}")
+    return render_tab_content(f"tab-{channel_id}"), ""
 
 
 @app.callback(
-    Output("app-container", "children"),
-    Input("run-scraping-channels", "n_clicks")
+    [Output("app-container", "children"), Output("loading-channels-scraping-output", "children")],
+    Input("run-scraping-channels", "n_clicks"),
 )
 def run_channels_scraping(n_clicks):
     if not n_clicks or n_clicks <= 0:
-        return [build_channels_tabs(), html.Div(id="app-content")]
+        return [build_channels_tabs(), html.Div(id="app-content")], None
     logger.info(f"Click on run scraping for all channels {n_clicks}")
     scraper.run_scraper()
     logger.info(f"Completed scraping")
-    return [build_channels_tabs(), html.Div(id="app-content")]
+    return [build_channels_tabs(), html.Div(id="app-content")], None
 
 
 def generate_section_banner(title):
