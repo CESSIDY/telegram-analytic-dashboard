@@ -50,6 +50,10 @@ class DatabaseHandler(BaseDatabaseHandler):
             existing_comment.save()
             print("Comment already exists. Updated content and timestamp.")
 
+    def get_all_channels(self):
+        channels = Channel.objects().all()
+        return channels
+
     def get_messages_by_chat_id(self, chat_id):
         messages = Message.objects(chat_id=chat_id).all()
         return messages

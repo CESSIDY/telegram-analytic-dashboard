@@ -1,1 +1,1 @@
-from .scraper import MessagesScraper
+from .scraper import Scraper

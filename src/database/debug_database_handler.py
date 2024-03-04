@@ -18,11 +18,14 @@ class DebugDatabaseHandler(BaseDatabaseHandler):
         logger.info(f"chat_id: {chat_id} => message_id: {message_id} => comment_id: {comment_id} => "
                     f"content: {json.loads(content)}")
 
+    def get_all_channels(self):
+        return []
+
     def get_messages_by_chat_id(self, chat_id):
-        return {}
+        return []
 
     def get_comments_by_message_id(self, message_id):
-        return {}
+        return []
 
     def get_comments_by_chat_id(self, chat_id):
-        return {}
+        return []

@@ -16,6 +16,6 @@ COPY ./poetry.lock ./poetry.toml ./pyproject.toml /var/app/
 
 RUN cd /var/app/ && poetry install
 
-EXPOSE 8080
+EXPOSE 8051
 
 ENTRYPOINT ["/bin/bash", "-l", "-c", "setup.sh"]

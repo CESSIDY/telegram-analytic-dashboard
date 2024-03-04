@@ -7,11 +7,12 @@ from scraper.managers import ChannelsManager, MessagesManager
 
 
 class BaseScraper(ABC):
-    def __init__(self, channels_loader: BaseChannelsLoader, accounts_loader: BaseAccountsLoader,
-                 db_handler: BaseDatabaseHandler):
+    def __init__(self, db_handler: BaseDatabaseHandler, channels_loader: BaseChannelsLoader,
+                 accounts_loader: BaseAccountsLoader):
+        self.db_handler = db_handler
         self.channels_loader = channels_loader
         self.accounts_loader = accounts_loader
-        self.db_handler = db_handler
+
         self.channels_manager = None
         self.messages_manager = None
 
@@ -22,5 +23,5 @@ class BaseScraper(ABC):
         self.messages_manager = MessagesManager(client=client)
 
     @abstractmethod
-    def run_scraper(self):
+    def run_scraper(self, channel_id: int = None):
         pass
