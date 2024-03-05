@@ -21,8 +21,9 @@ services:
       - 'dockerhost:${DOCKER_HOST_IP}'
     depends_on:
       - mongo
+      - redis
     ports:
-      - '${PYTHON_PORT}:8080'
+      - '${DASH_APP_PORT}:8051'
     stdin_open: true
     tty: true
     networks:
@@ -50,5 +51,26 @@ services:
       - 'ME_CONFIG_MONGODB_URL=mongodb://${MONGODB_USERNAME}:${MONGODB_PASSWORD}@mongo:27017/'
     depends_on:
       - mongo
+    networks:
+      - general
+  redis:
+    image: "redis:latest"
+    ports:
+      - '${REDIS_PORT}:6379'
+    networks:
+      - general
+  celery:
+    build:
+      context: .
+      dockerfile: ./docker/python/Dockerfile
+      args:
+        - 'PYTHON_VERSION=${PYTHON_VERSION}'
+    volumes:
+      - './src:/var/app/src'
+      - './data:/var/app/data'
+      - './.env:/var/app/.env'
+    command: [ "honcho", "start", "queue" ]
+    depends_on:
+      - redis
     networks:
       - general

@@ -1,4 +1,6 @@
 import logging
+import threading
+import asyncio
 
 from telethon.sync import TelegramClient
 
@@ -12,9 +14,26 @@ logger = logging.getLogger(__name__)
 
 
 class AuthScraper(BaseScraper):
-    def run_scraper(self):
+    def run_scraper(self, channel_id: int = None):
+        scraper_thread = threading.Thread(target=self._run_scraper_at_thread, args=(channel_id,))
+        scraper_thread.start()
+        scraper_thread.join()
+
+    def _run_scraper_at_thread(self, channel_id: int):
+        self._check_on_event_loop()
         clients = self.authenticate()
-        self.run_channels_scraper_for_each_account(clients)
+        self.run_channels_scraper_for_each_account(clients, channel_id)
+
+    @staticmethod
+    def _check_on_event_loop():
+        try:
+            _ = asyncio.get_event_loop()
+        except RuntimeError as e:
+            if str(e).startswith('There is no current event loop in thread'):
+                loop = asyncio.new_event_loop()
+                asyncio.set_event_loop(loop)
+            else:
+                raise
 
     def authenticate(self):
         account_models = self.accounts_loader.get_all()
@@ -34,6 +53,7 @@ class AuthScraper(BaseScraper):
             except Exception as err:
                 print(f"Authorization error for {account.username}")
                 logger.error(err)
+                raise err
 
         return valid_clients
 
@@ -50,12 +70,12 @@ class AuthScraper(BaseScraper):
 
         return client
 
-    def run_channels_scraper_for_each_account(self, clients: [TelegramClient]):
+    def run_channels_scraper_for_each_account(self, clients: [TelegramClient], channel_id: int):
         for client in clients:
             with client:
                 self.set_channels_manager(client)
                 self.set_messages_manager(client)
-                client.loop.run_until_complete(self.start_scraping())
+                client.loop.run_until_complete(self.start_scraping(channel_id))
 
-    async def start_scraping(self):
+    async def start_scraping(self, channel_id: int):
         pass

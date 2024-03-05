@@ -5,14 +5,16 @@ from .auth_scraper import AuthScraper
 logger = logging.getLogger(__name__)
 
 
-class MessagesScraper(AuthScraper):
-    MESSAGES_LIMIT = 2
-    COMMENTS_LIMIT = 3
+class Scraper(AuthScraper):
+    MESSAGES_LIMIT = 20
+    COMMENTS_LIMIT = 20
 
-    async def start_scraping(self):
+    async def start_scraping(self, channel_id: int) -> None:
         channels = await self.channels_manager.get_channels()
 
         for channel in channels:
+            if channel_id and channel_id != channel.id:
+                continue
             logger.info(f"Start scraping from channel({channel.title}/{channel.id})")
             self.scrape_and_store_channel_info(channel)
             await self.scrape_and_store_messages_from_channel(channel)

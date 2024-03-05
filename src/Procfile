@@ -1,0 +1,2 @@
+web: gunicorn --bind 0.0.0.0:8051 'main:server'
+queue: celery -A main:celery_app worker --loglevel=INFO --concurrency=2
