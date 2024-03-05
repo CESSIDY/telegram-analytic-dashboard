@@ -1,12 +1,14 @@
 from typing import List
 import logging
+import time
 
 import dash
-from dash import dash_table, Input, Output, State, html, dcc, callback, DiskcacheManager, CeleryManager
+from dash import dash_table, Input, Output, State, html, dcc, callback, CeleryManager
 import plotly.graph_objs as go
 import dash_daq as daq
 import dash_mantine_components as dmc
 import pandas as pd
+from celery import Celery
 
 from database import BaseDatabaseHandler
 from database.models import Channel, Message, Comment
@@ -20,27 +22,18 @@ from loaders.accounts import JsonAccountsLoader
 
 logger = logging.getLogger(__name__)
 
-if settings.REDIS_URL:
-    # Use Redis & Celery if REDIS_URL set as an env variable
-    from celery import Celery
-    celery_app = Celery(__name__, broker=settings.REDIS_URL, backend=settings.REDIS_URL)
-    background_callback_manager = CeleryManager(celery_app)
-
-else:
-    # Diskcache for non-production apps when developing locally
-    import diskcache
-    cache = diskcache.Cache("./cache")
-    background_callback_manager = DiskcacheManager(cache)
+celery_app = Celery(__name__, broker=settings.REDIS_URL, backend=settings.REDIS_URL)
+background_callback_manager = CeleryManager(celery_app)
 
 app = dash.Dash(
     __name__,
     meta_tags=[{"name": "viewport", "content": "width=device-width, initial-scale=1"}],
+    background_callback_manager=background_callback_manager
 )
 app.title = "Telegram Channels Dashboard"
 server = app.server
 app.config["suppress_callback_exceptions"] = True
 
-# https://github.com/bradley-erickson/dash-app-structure
 
 db_handler = DatabaseHandler()
 channels_loader = JsonChannelsLoader()
@@ -288,6 +281,7 @@ app.layout = html.Div(
 @app.callback(
     Output("app-content", "children"),
     Input("channels-tabs", "value"),
+    background=True
 )
 def render_tab_content(tab_switch: str):
     channel_id = tab_switch.split('tab-')[-1]
@@ -309,6 +303,14 @@ def render_tab_content(tab_switch: str):
      Output("loading-channel-scraping-output", "children")],
     [Input("run-scraping-channel", "value"),
      Input("run-scraping-channel", "n_clicks")],
+    background=True,
+    running=[
+        (
+                Output("loading-channel-scraping-output", "style"),
+                {"visibility": "visible"},
+                {"visibility": "hidden"},
+        ),
+    ],
     prevent_initial_call=True
 )
 def run_channel_scraping(channel_id, n_clicks):
@@ -317,12 +319,21 @@ def run_channel_scraping(channel_id, n_clicks):
     logger.info(f"Click on run scraping for channel {channel_id}")
     scraper.run_scraper(int(channel_id))
     logger.info(f"Completed scraping")
-    return render_tab_content(f"tab-{channel_id}"), ""
+    return render_tab_content(f"tab-{channel_id}"), None
 
 
 @app.callback(
     [Output("app-container", "children"), Output("loading-channels-scraping-output", "children")],
     Input("run-scraping-channels", "n_clicks"),
+    background=True,
+    running=[
+        (
+                Output("loading-channels-scraping-output", "style"),
+                {"visibility": "visible"},
+                {"visibility": "hidden"},
+        ),
+    ],
+    prevent_initial_call=True
 )
 def run_channels_scraping(n_clicks):
     if not n_clicks or n_clicks <= 0:

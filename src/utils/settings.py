@@ -20,6 +20,11 @@ class Settings:
     DASH_PORT = int(os.getenv("PYTHON_PORT", "8051"))
     DASH_DEBUG = bool(int(os.getenv("DASH_DEBUG", 0)))
 
+    # Redis configuration
+    REDIS_ADDRESS = os.getenv("REDIS_ADDRESS", "redis")
+    REDIS_PORT = os.getenv("REDIS_PORT", "6379")
+    REDIS_URL = f"redis://{REDIS_ADDRESS}:{REDIS_PORT}/0"
+
     # Proxy configuration
     PROXY_ENABLED = int(os.getenv("PROXY_ENABLED", 0))
     PROXY_USERNAME = os.getenv("PROXY_USERNAME", "")
