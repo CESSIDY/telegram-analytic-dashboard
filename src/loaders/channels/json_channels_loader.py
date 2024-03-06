@@ -3,7 +3,7 @@ import os
 import json
 import logging
 from typing import List
-from models import ChannelLoaderModel
+from loaders.loaders_models import ChannelLoaderModel
 
 logger = logging.getLogger(__name__)
 

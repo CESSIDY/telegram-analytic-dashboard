@@ -65,7 +65,7 @@ class Message(BaseMessage, Document):
         last_update_date_month = last_update_datetime.strftime("%B")
         message_dict = {
             "id": self.message_id,
-            "chat_id": self.chat_id,
+            "channel_id": self.chat_id,
             "datetime": last_update_datetime,
             "date": last_update_date,
             "month": last_update_date_month,
@@ -97,7 +97,7 @@ class Comment(BaseMessage, Document):
         comment_dict = {
             "id": self.comment_id,
             "message_id": self.message_id,
-            "chat_id": self.chat_id,
+            "channel_id": self.chat_id,
             "datetime": last_update_datetime,
             "date": last_update_date,
             "month": last_update_date_month,

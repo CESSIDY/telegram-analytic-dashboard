@@ -16,9 +16,10 @@ from loaders.channels import BaseChannelsLoader
 from scraper.base_scraper import BaseScraper
 from utils import settings
 from scraper import Scraper
-from database import DatabaseHandler, DebugDatabaseHandler
+from database.handlers import DatabaseHandler, DebugDatabaseHandler
 from loaders.channels import JsonChannelsLoader
 from loaders.accounts import JsonAccountsLoader
+from .components import ChannelTabDashboardManager, MessageEngagementChartsComponent
 
 logger = logging.getLogger(__name__)
 
@@ -28,17 +29,25 @@ background_callback_manager = CeleryManager(celery_app)
 app = dash.Dash(
     __name__,
     meta_tags=[{"name": "viewport", "content": "width=device-width, initial-scale=1"}],
-    background_callback_manager=background_callback_manager
+    background_callback_manager=background_callback_manager,
+    title="Telegram Channels Dashboard"
 )
-app.title = "Telegram Channels Dashboard"
 server = app.server
 app.config["suppress_callback_exceptions"] = True
 
-
+# DBDataToPandasLoader
 db_handler = DatabaseHandler()
 channels_loader = JsonChannelsLoader()
 accounts_loader = JsonAccountsLoader()
 scraper = Scraper(db_handler, channels_loader, accounts_loader)
+
+channel_tab_dashboard_manager = ChannelTabDashboardManager(db_handler).add_components(
+    [
+        MessageEngagementChartsComponent(),
+        MessageEngagementChartsComponent(),
+        MessageEngagementChartsComponent(),
+    ]
+)
 
 channels_count = len(channels_loader.get_all())
 
@@ -170,98 +179,6 @@ def build_quick_stats_panel(channel_id, messages: List[Message]):
     )
 
 
-def build_top_panel():
-    return html.Div(
-        id="top-section-container",
-        className="row",
-        children=[
-            # Metrics summary
-            html.Div(
-                id="metric-summary",
-                className="eight columns",
-                children=[
-                    generate_section_banner("Metrics Summary"),
-                    html.Div(
-                        id="metric-div",
-                        children=[],  # TODO Add some metrics
-                    ),
-                ],
-            ),
-            # Piechart
-            html.Div(
-                id="piechart-outer",
-                className="four columns",
-                children=[
-                    generate_section_banner("% Some data"),
-                    generate_piechart(),  # TODO Fill pie chart
-                ],
-            ),
-        ],
-    )
-
-
-def generate_piechart():
-    return dcc.Graph(
-        id="piechart",
-        figure={
-            "data": [
-                {
-                    "labels": [],
-                    "values": [],
-                    "type": "pie",
-                    "marker": {"line": {"color": "white", "width": 1}},
-                    "hoverinfo": "label",
-                    "textinfo": "label",
-                }
-            ],
-            "layout": {
-                "margin": dict(l=20, r=20, t=20, b=20),
-                "showlegend": True,
-                "paper_bgcolor": "rgba(0,0,0,0)",
-                "plot_bgcolor": "rgba(0,0,0,0)",
-                "font": {"color": "white"},
-                "autosize": True,
-            },
-        },
-    )
-
-
-def build_chart_panel():
-    return html.Div(
-        id="control-chart-container",
-        className="twelve columns",
-        children=[
-            generate_section_banner("Some Chart"),
-            dcc.Graph(
-                id="some-chart",
-                figure=go.Figure(
-                    {
-                        "data": [
-                            {
-                                "x": [],
-                                "y": [],
-                                "mode": "lines+markers",
-                                "name": "some",
-                            }
-                        ],
-                        "layout": {
-                            "paper_bgcolor": "rgba(0,0,0,0)",
-                            "plot_bgcolor": "rgba(0,0,0,0)",
-                            "xaxis": dict(
-                                showline=False, showgrid=False, zeroline=False
-                            ),
-                            "yaxis": dict(
-                                showgrid=False, showline=False, zeroline=False
-                            ),
-                            "autosize": True,
-                        },
-                    }
-                ),
-            ),
-        ],
-    )
-
-
 app.layout = html.Div(
         id="big-app-container",
         children=[
@@ -285,14 +202,14 @@ app.layout = html.Div(
 )
 def render_tab_content(tab_switch: str):
     channel_id = tab_switch.split('tab-')[-1]
-    messages = db_handler.get_messages_by_chat_id(channel_id)
+    messages = db_handler.get_messages_by_channel_id(channel_id)
     return [html.Div(
         id="status-container",
         children=[
             build_quick_stats_panel(channel_id, messages),
             html.Div(
                 id="graphs-container",
-                children=[build_top_panel(), build_chart_panel()],
+                children=channel_tab_dashboard_manager.set_messages_df(channel_id).build_components(),
             ),
         ],
     )]
@@ -342,7 +259,3 @@ def run_channels_scraping(n_clicks):
     scraper.run_scraper()
     logger.info(f"Completed scraping")
     return [build_channels_tabs(), html.Div(id="app-content")], None
-
-
-def generate_section_banner(title):
-    return html.Div(className="section-banner", children=title)

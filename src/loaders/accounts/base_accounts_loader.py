@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from typing import List
-from models import AccountsLoaderModel
+from loaders.loaders_models import AccountsLoaderModel
 
 
 class BaseAccountsLoader(ABC):
