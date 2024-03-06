@@ -10,16 +10,14 @@ import dash_mantine_components as dmc
 import pandas as pd
 from celery import Celery
 
-from database import BaseDatabaseHandler
-from database.models import Channel, Message, Comment
-from loaders.channels import BaseChannelsLoader
-from scraper.base_scraper import BaseScraper
 from utils import settings
 from scraper import Scraper
-from database.handlers import DatabaseHandler, DebugDatabaseHandler
+from database.handlers import DatabaseHandler
 from loaders.channels import JsonChannelsLoader
 from loaders.accounts import JsonAccountsLoader
-from .components import ChannelTabDashboardManager, MessageEngagementChartsComponent
+from .components.page_components import (ChannelTabsComponent, BannerComponent)
+from .components.channel_tab_components import (ChannelTabDashboardManager,
+                                                MessageEngagementChartsComponent)
 
 logger = logging.getLogger(__name__)
 
@@ -49,6 +47,9 @@ channel_tab_dashboard_manager = ChannelTabDashboardManager(db_handler).add_compo
     ]
 )
 
+channels_tabs_component = ChannelTabsComponent(db_handler, channels_loader)
+banner_component = BannerComponent(db_handler, channels_loader)
+
 channels_count = len(channels_loader.get_all())
 
 
@@ -56,137 +57,14 @@ def run_server():
     app.run_server(debug=settings.DASH_DEBUG, port=settings.DASH_PORT)
 
 
-def build_banner():
-    return html.Div(
-        id="banner",
-        className="banner",
-        children=[
-            html.Div(
-                id="banner-text",
-                children=[
-                    html.H5("Telegram Channels Dashboard"),
-                ],
-            ),
-            html.Div(
-                id="banner-scraping-button",
-                children=[
-                    html.Div(
-                        children=[
-                            dcc.Loading(
-                                id="loading-channels",
-                                type="circle",  # or "default"
-                                children=[html.Button(
-                                    id="run-scraping-channels", children=f"Run scraping for ({channels_count}) channels", n_clicks=0
-                                    ),
-                                    html.Div(id="loading-channels-scraping-output")],
-                            ),
-                        ],
-                        style={"text-align": "center", 'display': 'flex'}
-                    ),
-                ],
-            ),
-        ],
-    )
-
-
-def build_channels_tabs():
-    channels_tabs = []
-    channels = db_handler.get_all_channels()
-
-    if not channels:
-        return render_non_channels_scraped_message()
-
-    for channel in channels:
-        tab = dcc.Tab(
-            id=f"tab-{channel.chat_id}",
-            label=channel.name,
-            value=f"tab-{channel.chat_id}",
-            className="custom-tab",
-            selected_className="custom-tab--selected",
-        )
-        channels_tabs.append(tab)
-
-    return html.Div(
-        id="tabs",
-        className="tabs",
-        children=[
-            dcc.Tabs(
-                id="channels-tabs",
-                value=f"tab-{channels[0].chat_id}" if channels else "",
-                className="custom-tabs",
-                children=channels_tabs,
-            )
-        ],
-    )
-
-
-def render_non_channels_scraped_message():
-    channels_count = len(channels_loader.get_all())
-    return html.Div(
-        id="non-channels",
-        children=[
-            html.P(f"No channels was scraped click on button above to run scraping for ({channels_count}) channels")],
-        style={"marginBottom": "20px", "textAlign": "center", "maxWidth": "600px"}
-    )
-
-
-def build_quick_stats_panel(channel_id, messages: List[Message]):
-    messages_count = len(messages)
-    last_update_timestamp = list(messages)[-1].timestamp
-    return html.Div(
-        id="quick-stats",
-        className="row",
-        children=[
-            html.Div(
-                id="card-message-count",
-                children=[
-                    html.P("Messages count"),
-                    daq.LEDDisplay(
-                        id="messages-count",
-                        value=f"{messages_count}",
-                        color="#92e0d3",
-                        backgroundColor="#1e2130",
-                        size=40,
-                    ),
-                ],
-            ),
-            html.Div(
-                id="card-last-update",
-                children=[
-                    html.P("Last update"),
-                    html.Div(
-                        children=[
-                            html.Span(f"{last_update_timestamp}", style={"backgroundColor": "#1e2130"}),
-                        ],
-                        style={"font-size": "1.2em", "color": "#92e0d3", "margin": "20px"}
-                    )
-                ],
-            ),
-            html.Div(
-                id="utility-card",
-                children=[
-                    dcc.Loading(
-                        id="loading-channel",
-                        type="circle",  # or "default"
-                        children=[
-                            html.Button('Run scraping', id='run-scraping-channel', value=f"{channel_id}", n_clicks=0),
-                            html.Div(id="loading-channel-scraping-output")],
-                    ),
-
-                ],
-            ),
-        ],
-    )
-
-
 app.layout = html.Div(
         id="big-app-container",
         children=[
-            build_banner(),
+            banner_component.build(),
             html.Div(
                 id="app-container",
                 children=[
-                    build_channels_tabs(),
+                    channels_tabs_component.build(),
                     # Main app
                     html.Div(id="app-content"),
                 ],
@@ -202,16 +80,9 @@ app.layout = html.Div(
 )
 def render_tab_content(tab_switch: str):
     channel_id = tab_switch.split('tab-')[-1]
-    messages = db_handler.get_messages_by_channel_id(channel_id)
     return [html.Div(
         id="status-container",
-        children=[
-            build_quick_stats_panel(channel_id, messages),
-            html.Div(
-                id="graphs-container",
-                children=channel_tab_dashboard_manager.set_messages_df(channel_id).build_components(),
-            ),
-        ],
+        children=channel_tab_dashboard_manager.set_channel(channel_id).build_components(),
     )]
 
 
@@ -254,8 +125,8 @@ def run_channel_scraping(channel_id, n_clicks):
 )
 def run_channels_scraping(n_clicks):
     if not n_clicks or n_clicks <= 0:
-        return [build_channels_tabs(), html.Div(id="app-content")], None
+        return [channels_tabs_component.build(), html.Div(id="app-content")], None
     logger.info(f"Click on run scraping for all channels {n_clicks}")
     scraper.run_scraper()
     logger.info(f"Completed scraping")
-    return [build_channels_tabs(), html.Div(id="app-content")], None
+    return [channels_tabs_component.build(), html.Div(id="app-content")], None

@@ -3,11 +3,11 @@ import plotly.graph_objs as go
 import dash_daq as daq
 from pandas import DataFrame
 
-from .basic_components import generate_section_banner
-from .base_component import BaseComponent
+from web_app.components.utils.basic_components import generate_section_banner
+from .base_dashboard_component import BaseDashboardComponent
 
 
-class MessageEngagementChartsComponent(BaseComponent):
+class MessageEngagementChartsComponent(BaseDashboardComponent):
     MOST_RECENT_MESSAGE_OFFSET = 3
 
     def set_messages_df(self, messages_df: DataFrame):
@@ -23,7 +23,7 @@ class MessageEngagementChartsComponent(BaseComponent):
         x = list(range(len(self.messages_df)))
 
         if is_group_by_date:
-            messages_df = self.messages_df.groupby(['date'])[list(included_columns.keys())].sum().reset_index()
+            messages_df = self.messages_df.groupby(['date'])[list(included_columns.keys())].mean().reset_index()
             x = messages_df['date']
         charts_data = []
         for k, v in included_columns.items():

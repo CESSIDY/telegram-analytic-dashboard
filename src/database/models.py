@@ -75,6 +75,7 @@ class Message(BaseMessage, Document):
             "reactions": sum(emojis.values()),
             "emojis": emojis,
             "main_emoji_reaction": main_emoji_reaction,
+            "scraped_at_timestamp": self.timestamp,
         }
         return message_dict
 
@@ -105,6 +106,7 @@ class Comment(BaseMessage, Document):
             "user_id": user_id,
             "reactions": sum(emojis.values()),
             "emojis": emojis,
+            "scraped_at_timestamp": self.timestamp,
         }
 
         return comment_dict
