@@ -27,3 +27,4 @@ class ChannelTabDashboardManager:
 
     def build_components(self):
         return [component.build() for component in self.components]
+
