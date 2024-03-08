@@ -41,9 +41,7 @@ scraper = Scraper(db_handler, channels_loader, accounts_loader)
 
 channel_tab_dashboard_manager = ChannelTabDashboardManager(db_handler).add_components(
     [
-        MessageEngagementChartsComponent(),
-        MessageEngagementChartsComponent(),
-        MessageEngagementChartsComponent(),
+        MessageEngagementChartsComponent(),#TODO: Maybe add component_name here
     ]
 )
 
@@ -76,7 +74,7 @@ app.layout = html.Div(
 @app.callback(
     Output("app-content", "children"),
     Input("channels-tabs", "value"),
-    background=True
+    #background=True
 )
 def render_tab_content(tab_switch: str):
     channel_id = tab_switch.split('tab-')[-1]

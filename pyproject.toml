@@ -25,6 +25,7 @@ matplotlib = "^3.8.3"
 seaborn = "^0.13.2"
 wordcloud = "^1.9.3"
 nltk = "^3.8.1"
+dash-bootstrap-components = "^1.5.0"
 
 [tool.poetry.dev-dependencies]
 
