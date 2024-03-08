@@ -11,7 +11,7 @@ class DatabaseHandler(BaseDatabaseHandler):
         connect_to_database()
 
     def store_channel(self, channel_id, chat_name, content):
-        existing_channel = Channel.objects(channel_id=channel_id).first()
+        existing_channel = Channel.objects(chat_id=channel_id).first()
 
         if not existing_channel:
             channel = Channel(chat_id=channel_id, name=chat_name, content=content, timestamp=datetime.now())
