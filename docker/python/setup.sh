@@ -1,4 +1,5 @@
-set -eu
+#!/bin/bash
+set -eux
 cd /var/app
 
 source ./.venv/bin/activate

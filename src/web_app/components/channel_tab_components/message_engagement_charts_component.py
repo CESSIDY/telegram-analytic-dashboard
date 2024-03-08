@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 
 class MessageEngagementChartsComponent(BaseDashboardComponent):
-    MOST_RECENT_MESSAGE_OFFSET = 3
+    MOST_RECENT_MESSAGE_OFFSET = 3  # TODO: Remove just messages for N last days (give user to decide)
     DEFAULT_INCLUDED_COLUMNS = ['views', 'forwards', 'reactions']
 
     def set_messages_df(self, messages_df: DataFrame):

@@ -1,3 +1,4 @@
 from .base_component import BaseComponent
 from .channels_tabs_component import ChannelTabsComponent
 from .banner_component import BannerComponent
+from .scrapers_actions_component import ScrapersActionsComponent

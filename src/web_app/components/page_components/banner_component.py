@@ -1,12 +1,14 @@
 from dash import html, dcc
 
+from database import BaseDatabaseHandler
+from loaders.channels import BaseChannelsLoader
 from .base_component import BaseComponent
 
 
 class BannerComponent(BaseComponent):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.channels = self.db_handler.get_all_channels()
+    def __init__(self, channels_loader: BaseChannelsLoader):
+        self.channels_loader = channels_loader
+        self.channels = self.channels_loader.get_all()
 
     def build(self):
         return self.build_banner()
