@@ -12,6 +12,7 @@ COPY ./docker/python/setup.sh /usr/local/bin/
 RUN set -eu && chmod +x /usr/local/bin/setup.sh
 
 RUN /usr/local/bin/python -m pip install --upgrade pip && /usr/local/bin/python -m pip install poetry
+
 COPY ./poetry.lock ./poetry.toml ./pyproject.toml /var/app/
 
 RUN cd /var/app/ && poetry install

@@ -45,7 +45,9 @@ channel_tab_dashboard_manager = ChannelTabDashboardManager(db_handler).add_compo
     ]
 )
 
-channels_tabs_component = ChannelTabsComponent(db_handler, channels_loader)
+channels_tabs_component = ChannelTabsComponent(db_handler=db_handler,
+                                               channels_loader=channels_loader,
+                                               channel_tab_dashboard_manager=channel_tab_dashboard_manager)
 banner_component = BannerComponent(db_handler, channels_loader)
 
 channels_count = len(channels_loader.get_all())
@@ -72,19 +74,6 @@ app.layout = html.Div(
 
 
 @app.callback(
-    Output("app-content", "children"),
-    Input("channels-tabs", "value"),
-    #background=True
-)
-def render_tab_content(tab_switch: str):
-    channel_id = tab_switch.split('tab-')[-1]
-    return [html.Div(
-        id="status-container",
-        children=channel_tab_dashboard_manager.set_channel(channel_id).build_components(),
-    )]
-
-
-@app.callback(
     [Output("app-content", "children", allow_duplicate=True),
      Output("loading-channel-scraping-output", "children")],
     [Input("run-scraping-channel", "value"),
@@ -101,11 +90,11 @@ def render_tab_content(tab_switch: str):
 )
 def run_channel_scraping(channel_id, n_clicks):
     if not n_clicks or n_clicks <= 0:
-        return render_tab_content(f"tab-{channel_id}"), None
+        return channels_tabs_component.build_tab_content(f"tab-{channel_id}"), None
     logger.info(f"Click on run scraping for channel {channel_id}")
     scraper.run_scraper(int(channel_id))
     logger.info(f"Completed scraping")
-    return render_tab_content(f"tab-{channel_id}"), None
+    return channels_tabs_component.build_tab_content(f"tab-{channel_id}"), None
 
 
 @app.callback(

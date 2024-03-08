@@ -1,15 +1,31 @@
-from dash import html, dcc
+from dash import html, dcc, callback, Input, Output
 
 from .base_component import BaseComponent
+from web_app.components.channel_tab_components import ChannelTabDashboardManager
 
 
 class ChannelTabsComponent(BaseComponent):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, channel_tab_dashboard_manager: ChannelTabDashboardManager, **kwargs):
         super().__init__(*args, **kwargs)
         self.channels = self.db_handler.get_all_channels()
+        self.channel_tab_dashboard_manager = channel_tab_dashboard_manager
+        self.set_callbacks()
 
     def build(self):
         return self.build_channels_tabs()
+
+    def set_callbacks(self):
+        callback(
+            Output("app-content", "children"),
+            Input("channels-tabs", "value"),
+        )(self.build_tab_content)
+
+    def build_tab_content(self, tab_switch: str):
+        channel_id = int(tab_switch.split('tab-')[-1])
+        return [html.Div(
+            id="status-container",
+            children=self.channel_tab_dashboard_manager.set_channel(channel_id).build_components(),
+        )]
 
     def build_channels_tabs(self):
         channels_tabs = []
