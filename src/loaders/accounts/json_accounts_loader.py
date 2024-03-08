@@ -1,5 +1,5 @@
 from typing import List
-from models import AccountsLoaderModel
+from loaders.loaders_models import AccountsLoaderModel
 from .base_accounts_loader import BaseAccountsLoader
 import os
 import json

@@ -20,6 +20,12 @@ pandas = "^2.2.1"
 dash-mantine-components = "^0.12.1"
 diskcache = "^5.6.3"
 honcho = "^1.1.0"
+jupyter = "^1.0.0"
+matplotlib = "^3.8.3"
+seaborn = "^0.13.2"
+wordcloud = "^1.9.3"
+nltk = "^3.8.1"
+dash-bootstrap-components = "^1.5.0"
 
 [tool.poetry.dev-dependencies]
 

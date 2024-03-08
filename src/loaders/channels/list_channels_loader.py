@@ -1,5 +1,5 @@
 from . import BaseChannelsLoader
-from models import ChannelLoaderModel
+from loaders.loaders_models import ChannelLoaderModel
 from typing import List
 
 

@@ -5,7 +5,7 @@ import asyncio
 from telethon.sync import TelegramClient
 
 from .base_scraper import BaseScraper
-from models import AccountsLoaderModel
+from loaders.loaders_models import AccountsLoaderModel
 from scraper.utils import get_session_path
 from utils import get_proxy_configurations, configure_logging
 
