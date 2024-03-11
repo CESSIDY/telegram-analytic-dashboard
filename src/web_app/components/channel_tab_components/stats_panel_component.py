@@ -1,7 +1,12 @@
+import logging
+
 from dash import html, dcc
 import dash_daq as daq
 
 from .base_dashboard_component import BaseDashboardComponent
+
+
+logger = logging.getLogger(__name__)
 
 
 class StatsPanelComponent(BaseDashboardComponent):

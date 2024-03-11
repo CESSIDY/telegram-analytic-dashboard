@@ -1,4 +1,8 @@
 from .base_component import BaseComponent
 from .channels_tabs_component import ChannelTabsComponent
 from .banner_component import BannerComponent
+from .telegram_component import TelegramComponent
+from .telegram_account_auth_component import TelegramAccountAuthComponent
 from .scrapers_actions_component import ScrapersActionsComponent
+
+from .main_app_component import MainAppComponent

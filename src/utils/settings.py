@@ -33,5 +33,11 @@ class Settings:
     PROXY_PORT = os.getenv("PROXY_PORT", "")
     PROXY_TYPE = os.getenv("PROXY_TYPE", "")
 
+    # Telegram configuration
+    TELEGRAM_API_ID = os.getenv("TELEGRAM_API_ID", "")
+    TELEGRAM_API_HASH = os.getenv("TELEGRAM_API_HASH", "")
+    TELEGRAM_USERNAME = os.getenv("TELEGRAM_USERNAME", "")
+    TELEGRAM_PHONE = os.getenv("TELEGRAM_PHONE", "")
+
 
 settings = Settings()

@@ -1,19 +1,22 @@
 import logging
 
 from dash import html, dcc, callback, Input, Output
+from dash.exceptions import PreventUpdate
 
-from scraper import Scraper
+from .telegram_component import TelegramComponent
 from .base_component import BaseComponent
 from web_app.components.page_components import ChannelTabsComponent
+from web_app.components.page_components import TelegramAccountAuthComponent
 
 
 logger = logging.getLogger(__name__)
 
 
 class ScrapersActionsComponent(BaseComponent):
-    def __init__(self, channels_tabs_component: ChannelTabsComponent, scraper: Scraper):
+    def __init__(self, channels_tabs_component: ChannelTabsComponent,
+                 telegram_account_auth_component: TelegramAccountAuthComponent):
         self.channels_tabs_component = channels_tabs_component
-        self.scraper = scraper
+        self.telegram_account_auth_component = telegram_account_auth_component
         self.set_callbacks()
 
     def build(self):
@@ -37,7 +40,7 @@ class ScrapersActionsComponent(BaseComponent):
         )(self.run_channel_scraping)
 
         callback(
-            [Output("app-container", "children"), Output("loading-channels-scraping-output", "children")],
+            [Output("app-container", "children", allow_duplicate=True), Output("loading-channels-scraping-output", "children")],
             Input("run-scraping-channels", "n_clicks"),
             background=True,
             running=[
@@ -52,16 +55,28 @@ class ScrapersActionsComponent(BaseComponent):
 
     def run_channel_scraping(self, channel_id, n_clicks):
         if not n_clicks or n_clicks <= 0:
-            return self.channels_tabs_component.build_tab_content(f"tab-{channel_id}"), None
+            raise PreventUpdate  # self.channels_tabs_component.build_tab_content(f"tab-{channel_id}"), None
+        if not self.telegram_account_auth_component.is_scraper_unlocked():
+            raise PreventUpdate  # TODO Add some message about beasy with other process
+        if not self.telegram_account_auth_component.is_authorized():
+            return self.telegram_account_auth_component.build(), None
+
         logger.info(f"Click on run scraping for channel {channel_id}")
-        self.scraper.run_scraper(int(channel_id))
+        self.telegram_account_auth_component.run_scraping(int(channel_id))
         logger.info(f"Completed scraping")
+
         return self.channels_tabs_component.build_tab_content(f"tab-{channel_id}"), None
 
     def run_channels_scraping(self, n_clicks):
         if not n_clicks or n_clicks <= 0:
-            return [self.channels_tabs_component.build(), html.Div(id="app-content")], None
+            raise PreventUpdate  #[self.channels_tabs_component.build(), html.Div(id="app-content")], None
+        if not self.telegram_account_auth_component.is_scraper_unlocked():
+            raise PreventUpdate  # TODO Add some message about beasy with other process
+        if not self.telegram_account_auth_component.is_authorized():
+            return self.telegram_account_auth_component.build(), None
+
         logger.info(f"Click on run scraping for all channels {n_clicks}")
-        self.scraper.run_scraper()
+        self.telegram_account_auth_component.run_scraping()
         logger.info(f"Completed scraping")
+
         return [self.channels_tabs_component.build(), html.Div(id="app-content")], None

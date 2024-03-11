@@ -8,6 +8,9 @@ from .base_component import BaseComponent
 from web_app.components.channel_tab_components import ChannelTabDashboardManager
 
 
+logger = logging.getLogger(__name__)
+
+
 class ChannelTabsComponent(BaseComponent):
     def __init__(self, db_handler: BaseDatabaseHandler, channels_loader: BaseChannelsLoader,
                  channel_tab_dashboard_manager: ChannelTabDashboardManager):
@@ -21,14 +24,12 @@ class ChannelTabsComponent(BaseComponent):
         return self.build_channels_tabs()
 
     def set_callbacks(self):
-        logging.info("ChannelTabsComponent: set_callbacks")
         callback(
             Output("app-content", "children"),
             Input("channels-tabs", "value"),
         )(self.build_tab_content)
 
     def build_tab_content(self, tab_switch: str):
-        logging.info("ChannelTabsComponent: build_tab_content")
         channel_id = int(tab_switch.split('tab-')[-1])
         return [html.Div(
             id="status-container",
@@ -36,7 +37,6 @@ class ChannelTabsComponent(BaseComponent):
         )]
 
     def build_channels_tabs(self):
-        logging.info("ChannelTabsComponent: build_channels_tabs")
         channels_tabs = []
 
         if not self.channels:
