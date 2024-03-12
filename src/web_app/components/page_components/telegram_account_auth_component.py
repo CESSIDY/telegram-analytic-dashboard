@@ -25,9 +25,10 @@ class TelegramAccountAuthComponent(TelegramComponent):
 
     def set_callbacks(self):
         callback(
-            Output("app-container", "children", allow_duplicate=True),
+            Output("main-app-component", "children", allow_duplicate=True),
             [Input("auth-login-button", "n_clicks")],
             [State("auth-code-field-input", "value")],
+            background=True,
             prevent_initial_call=True,
         )(self.check_auth_code_input)
 
@@ -36,7 +37,6 @@ class TelegramAccountAuthComponent(TelegramComponent):
             raise PreventUpdate
         is_sing_in, exception = self.sign_in(value)
         if is_sing_in:
-            self.client_disconnect()
             return self.main_app_component.build()
         return self.build_enter_code_window(str(exception))
 
@@ -44,7 +44,8 @@ class TelegramAccountAuthComponent(TelegramComponent):
     def build_enter_code_window(exception=None):
         return html.Div(children=[
             html.Div(children=[
-                html.Label(exception),
+                html.Label("Before starting scraping, you need to authorize, enter the code received from telegram and run scraping again", className="auth-label"),
+                html.Label(exception, className="exception-label"),
                 html.Div(children=[
                     dcc.Input(id="auth-code-field-input", className='auth-code-field-input',
                               placeholder='Enter the code you received', type='number'),

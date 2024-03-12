@@ -16,7 +16,7 @@ class AuthScraper(BaseScraper):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.current_client = None
-        self.sent_code = None
+        self.phone_code_hash = None
 
     @property
     def client(self):
@@ -26,14 +26,15 @@ class AuthScraper(BaseScraper):
         return self.current_client
 
     def run_scraper(self, channel_id: int = None):
-        logger.info("Running scraper at thread")
+        self.client_disconnect()
+        del self.current_client
         scraper_thread = threading.Thread(target=self._run_scraper_at_thread, args=(channel_id,))
         scraper_thread.start()
         scraper_thread.join()
 
     def _run_scraper_at_thread(self, channel_id: int):
-        logger.info("Start thread")
         self._check_on_event_loop()
+        self.set_current_client()
         self.authenticate()
         self.run_channels_scraper(channel_id)
 
@@ -54,8 +55,8 @@ class AuthScraper(BaseScraper):
     def init_session(self):
         logger.info(f"Try login for: {settings.TELEGRAM_USERNAME}")
         try:
-            self.client.start(phone=settings.TELEGRAM_PHONE)
-            self.client_disconnect()
+            with self.client:
+                pass
             logger.info(f"Login successfully: {settings.TELEGRAM_USERNAME}")
         except Exception as err:
             logger.error(f"Authorization error for {settings.TELEGRAM_USERNAME}")
@@ -88,12 +89,11 @@ class AuthScraper(BaseScraper):
     def send_code_request(self):
         result = self.client.send_code_request(settings.TELEGRAM_PHONE)
         if result:
-            self.sent_code = result.phone_code_hash
+            self.phone_code_hash = result.phone_code_hash
         logger.info(f"Send code request")
 
     def sign_in(self, code: int):
-        logger.info("sign_in")
-        self.client.sign_in(phone=settings.TELEGRAM_PHONE, code=code, phone_code_hash=self.sent_code)
+        self.client.sign_in(phone=settings.TELEGRAM_PHONE, code=code, phone_code_hash=self.phone_code_hash)
         logger.info("Login successful")
 
     def run_channels_scraper(self, channel_id: int):

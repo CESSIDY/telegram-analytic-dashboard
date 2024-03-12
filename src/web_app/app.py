@@ -62,4 +62,4 @@ def run_server():
     app.run_server(debug=settings.DASH_DEBUG, port=settings.DASH_PORT)
 
 
-app.layout = main_app_component.build()
+app.layout = html.Div(id='main-app-component', children=[main_app_component.build()])
