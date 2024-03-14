@@ -264,7 +264,7 @@ body {
   flex: 1 1 auto;
 }
 
-#ooc-piechart-outer {
+#piechart-container-outer {
   height: 100%;
   margin: 0;
   border-left: #1E2130 solid 0.8rem;
@@ -706,7 +706,7 @@ body {
   }
 
   /*Removing borders}*/
-  #ooc-piechart-outer {
+  #piechart-container-outer {
     border-left: none;
   }
 
