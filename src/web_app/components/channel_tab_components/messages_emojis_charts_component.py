@@ -64,10 +64,10 @@ class MessageEmojisChartsComponent(BaseDashboardComponent):
     def build_interacted_components(self):
         return html.Div(
             [
-                html.P(
+                html.Div(
                     [
                         html.Button("Add group", id="add-emojis-group-btn", n_clicks=0,
-                                    style={'display': 'inline-block', 'margin': '5px', 'width': '100%'}),
+                                    style={'display': 'flex'}),
                         dcc.Loading(
                             id='loading-message-emojis-charts',
                             type='circle',  # or default
@@ -75,26 +75,21 @@ class MessageEmojisChartsComponent(BaseDashboardComponent):
                                 dbc.Button(
                                     id='build-message-emojis-charts',
                                     children='Build', n_clicks=0, outline=True,
-                                    style={'display': 'inline-block', 'margin': '5px', 'width': '100%'}
+                                    className='btn-build',
                                 ),
                                 html.Div(id='loading-message-emojis-charts-output')
                             ],
                         )
                     ],
-                    style={'display': 'inline-block', 'margin-left': '20px', 'margin-right': '20px',
-                           'vertical-align': 'middle'}
+                    className='btn-group'
                 ),
-                html.Div([
-                    html.Div(
-                        [
-                            html.Div(id="emojis-dropdown-container-div", children=[]),
-                        ],
-                        style={'display': 'inline-block', 'margin-right': '10px', 'margin-left': '10px'}
-                    )],
-                    style={'display': 'inline-block', 'vertical-align': 'middle'}
+                html.Div(
+                    id="emojis-dropdown-container-div",
+                    children=[],
+                    style={'display': 'flex', 'gap': '10px', 'flex-wrap': 'wrap'}
                 ),
             ],
-            className='auto__container',
+            className='emoji_interacted_container',
         )
 
     def display_dropdowns(self, n_clicks):
@@ -102,15 +97,19 @@ class MessageEmojisChartsComponent(BaseDashboardComponent):
             raise PreventUpdate
         patched_children = Patch()
         new_dropdown = html.Div([
-                dcc.Input(id={"type": "emojis-group-name", "index": n_clicks}, placeholder='Enter group name',
-                          type='text', style={'display': 'inline-block', 'vertical-align': 'middle', 'margin-left': '10px', 'max-width': '150px'}),
+                dcc.Input(
+                    id={"type": "emojis-group-name", "index": n_clicks},
+                    placeholder='Enter group name',
+                    type='text',
+                    style={'display': 'flex'}
+                ),
                 dcc.Dropdown(
                     self.all_emojis_options, [],
                     id={"type": "emojis-group-dropdown", "index": n_clicks},
                     multi=True,
-                    style={'display': 'inline-block', 'vertical-align': 'middle', 'margin-left': '10px', 'min-width': '100px'}
                 )
-            ], className='auto__container', style={'display': 'inline-block', 'vertical-align': 'middle', 'margin-right': '10px'}
+            ],
+            style={'display': 'flex', 'flex-direction': 'column', 'gap': '5px'}
         )
         patched_children.append(new_dropdown)
         return patched_children
