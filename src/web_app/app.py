@@ -14,10 +14,12 @@ from utils import settings
 from scraper import Scraper
 from database.handlers import DatabaseHandler
 from loaders.channels import JsonChannelsLoader
-from loaders.accounts import JsonAccountsLoader
-from .components.page_components import (ChannelTabsComponent, BannerComponent, ScrapersActionsComponent)
+
+from .components.page_components import (ChannelTabsComponent, BannerComponent, ScrapersActionsComponent,
+                                         MainAppComponent, TelegramAccountAuthComponent)
 from .components.channel_tab_components import (ChannelTabDashboardManager,
-                                                MessageEngagementChartsComponent)
+                                                MessageEngagementChartsComponent,
+                                                MessageEmojisChartsComponent)
 
 logger = logging.getLogger(__name__)
 
@@ -36,12 +38,12 @@ app.config["suppress_callback_exceptions"] = True
 # DBDataToPandasLoader
 db_handler = DatabaseHandler()
 channels_loader = JsonChannelsLoader()
-accounts_loader = JsonAccountsLoader()
-scraper = Scraper(db_handler, channels_loader, accounts_loader)
+scraper = Scraper(db_handler, channels_loader)
 
 channel_tab_dashboard_manager = ChannelTabDashboardManager(db_handler).add_components(
     [
         MessageEngagementChartsComponent(),#TODO: Maybe add component_name here
+        MessageEmojisChartsComponent(),
     ]
 )
 
@@ -49,28 +51,17 @@ channels_tabs_component = ChannelTabsComponent(db_handler=db_handler,
                                                channels_loader=channels_loader,
                                                channel_tab_dashboard_manager=channel_tab_dashboard_manager)
 
-scrapers_actions_components = ScrapersActionsComponent(channels_tabs_component, scraper)
-
 banner_component = BannerComponent(channels_loader)
 
-channels_count = len(channels_loader.get_all())
+main_app_component = MainAppComponent(banner_component, channels_tabs_component)
+
+telegram_account_auth_component = TelegramAccountAuthComponent(scraper=scraper, main_app_component=main_app_component)
+
+scrapers_actions_components = ScrapersActionsComponent(channels_tabs_component, telegram_account_auth_component)
 
 
 def run_server():
     app.run_server(debug=settings.DASH_DEBUG, port=settings.DASH_PORT)
 
 
-app.layout = html.Div(
-        id="big-app-container",
-        children=[
-            banner_component.build(),
-            html.Div(
-                id="app-container",
-                children=[
-                    channels_tabs_component.build(),
-                    # Main app
-                    html.Div(id="app-content"),
-                ],
-            )
-        ],
-    )
+app.layout = html.Div(id='main-app-component', children=[main_app_component.build()])

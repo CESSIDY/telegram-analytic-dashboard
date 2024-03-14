@@ -25,17 +25,18 @@ class ChannelsManager:
         channels_list = list()
 
         for channel_info in channels_loader.get_all():
-            if channel_info.private:
-                channel = await self.get_private_channel(channel_info)
-            else:
-                channel = await self.get_public_channel(channel_info)
+            channel = await self.get_channel(channel_info)
 
             if channel:
                 channels_list.append(channel)
+            else:
+                logger.error(f"Cant find channel by {channel_info.id}")
 
         return channels_list
 
-    async def get_private_channel(self, channel_info):
+    async def get_channel(self, channel_info):
+        channels_from_search = await self.client(functions.contacts.SearchRequest(channel_info.id, limit=5))
+
         if channel := await self.get_chat_obj(channel_info.id):
             return channel
 
@@ -63,13 +64,8 @@ class ChannelsManager:
             ))
             return channels_updates.chats[0]
         except ValueError as err:
-            logger.warning(f"Can't join channel {channel_info.id}")
-            logger.error(err)
-        return None
-
-    async def get_public_channel(self, channel_info) -> Channel:
-        channel = await self.get_chat_obj(channel_info.id)
-        return channel
+            pass
+        return channels_from_search.chats[0] if channels_from_search else None
 
     async def get_chat_obj(self, channel_id) -> tl.types.channels.ChannelParticipant or None:
         try:

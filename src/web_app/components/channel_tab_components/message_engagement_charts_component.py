@@ -53,7 +53,7 @@ class MessageEngagementChartsComponent(BaseDashboardComponent):
                 html.P(
                     [
                         dcc.Loading(
-                            id='loading - message - engagement - charts',
+                            id='loading-message-engagement-charts',
                             type='circle',  # or default
                             children=[
                                 dbc.Button(

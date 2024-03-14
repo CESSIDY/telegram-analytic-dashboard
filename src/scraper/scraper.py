@@ -1,13 +1,14 @@
 import logging
 
 from .auth_scraper import AuthScraper
+from utils import settings
 
 logger = logging.getLogger(__name__)
 
 
 class Scraper(AuthScraper):
-    MESSAGES_LIMIT = 10  # TODO: move this number to settings + give user to decide from UI
-    COMMENTS_LIMIT = 20  # TODO: move this number to settings + give user to decide from UI
+    MESSAGES_LIMIT = settings.TELEGRAM_MESSAGES_SCRAPING_LIMIT
+    COMMENTS_LIMIT = settings.TELEGRAM_COMMENTS_SCRAPING_LIMIT
 
     async def start_scraping(self, channel_id: int) -> None:
         channels = await self.channels_manager.get_channels()

@@ -9,5 +9,5 @@ class ListChannelsLoader(BaseChannelsLoader):
         super(ListChannelsLoader, self).__init__()
 
     def _parse_all_comments(self) -> List[ChannelLoaderModel]:
-        return [ChannelLoaderModel(id="bwt_commentator_test_1", private=False),
-                ChannelLoaderModel(id="If7N8EnSEWViYzgy", private=True)]
+        return [ChannelLoaderModel(id="some_test_chat"),
+                ChannelLoaderModel(id="nSd21d12eD54")]

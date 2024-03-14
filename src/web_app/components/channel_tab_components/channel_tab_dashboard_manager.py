@@ -17,6 +17,7 @@ class ChannelTabDashboardManager:
     def set_channel(self, channel_id: int):
         self.set_channel_id(channel_id)
         self.set_messages_df(channel_id)
+        self.set_db_data_to_pandas_loader(self.db_data_to_pandas_loader)
         return self
 
     def set_messages_df(self, channel_id):
@@ -28,6 +29,11 @@ class ChannelTabDashboardManager:
     def set_channel_id(self, channel_id):
         [component.set_channel_id(channel_id) for component in self.components]
         self.left_panel_component.set_channel_id(channel_id)
+        return self
+
+    def set_db_data_to_pandas_loader(self, db_data_to_pandas_loader: DBDataToPandasLoader):
+        [component.set_db_data_to_pandas_loader(db_data_to_pandas_loader) for component in self.components]
+        self.left_panel_component.set_db_data_to_pandas_loader(db_data_to_pandas_loader)
         return self
 
     def add_components(self, components: List[BaseDashboardComponent]):

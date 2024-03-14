@@ -46,8 +46,8 @@ class JsonChannelsLoader(BaseChannelsLoader):
         channels_models_list = []
 
         for channel in channels_list:
-            if channel.get("id") and isinstance(channel.get("private"), bool):
-                channel_model = ChannelLoaderModel(id=channel["id"], private= channel["private"])
+            if channel.get("id"):
+                channel_model = ChannelLoaderModel(id=channel["id"])
                 channels_models_list.append(channel_model)
             else:
                 logger.warning(f"Can't load channel obj: {channel}")

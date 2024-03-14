@@ -1,8 +1,12 @@
+import logging
 from dash import html, dcc
 
 from database import BaseDatabaseHandler
 from loaders.channels import BaseChannelsLoader
 from .base_component import BaseComponent
+
+
+logger = logging.getLogger(__name__)
 
 
 class BannerComponent(BaseComponent):
