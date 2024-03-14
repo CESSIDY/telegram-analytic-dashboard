@@ -900,3 +900,32 @@ body {
 .auth-login-button:hover{
 	background: #6d44b8;
 }
+
+
+/* Dropdown */
+
+.emoji_interacted_container{
+  display: flex;
+  gap: 20px;
+  padding: 20px;
+}
+
+.btn-group{
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.btn-group>button{
+  width: 100%;
+}
+
+.btn-build{
+  display: flex;
+  width: 100%;
+  justify-content: center;
+}
+
+.dash-dropdown{
+
+}
