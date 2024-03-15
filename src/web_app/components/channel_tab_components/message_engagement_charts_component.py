@@ -22,13 +22,12 @@ class MessageEngagementChartsComponent(BaseDashboardComponent):
 
     def build(self):
         return html.Div(
-            id="control-chart-container",
-            className="twelve columns",
+            className='control-chart-container',
             children=[
-                generate_section_banner("Message Engagement Trends Over Time"),
+                generate_section_banner('Message Engagement Trends Over Time'),
                 self.build_interacted_components(),
                 dcc.Graph(
-                    id="message-engagement-linechart",
+                    id='message-engagement-linechart',
                     figure=go.Figure(self.build_chart_figure())
                 )
             ],

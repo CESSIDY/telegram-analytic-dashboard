@@ -252,7 +252,7 @@ body {
   align-items: center;
 }
 
-#control-chart-container {
+.control-chart-container {
   position: relative;
   z-index: 4;
   width: 100%;
