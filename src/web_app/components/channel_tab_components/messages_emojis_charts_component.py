@@ -30,13 +30,12 @@ class MessageEmojisChartsComponent(BaseDashboardComponent):
 
     def build(self):
         return html.Div(
-            id="piechart-container-outer",
-            className="twelve columns",
+            className='control-chart-container',
             children=[
-                generate_section_banner("Distribution of messages broken down by main reactions"),
+                generate_section_banner('Distribution of messages broken down by main reactions'),
                 self.build_interacted_components(),
                 dcc.Graph(
-                    id="message-emojis-linechart",
+                    id='message-emojis-linechart',
                     figure=go.Figure(self.build_chart_figure())
                 )
             ],
@@ -46,15 +45,15 @@ class MessageEmojisChartsComponent(BaseDashboardComponent):
         callback(
             [Output('message-emojis-linechart', 'figure'),
              Output('loading-message-emojis-charts-output', 'children')],
-            [Input("build-message-emojis-charts", "n_clicks")],
-            [State({"type": "emojis-group-name", "index": ALL}, "value"),
-             State({"type": "emojis-group-dropdown", "index": ALL}, "value")],
+            [Input('build-message-emojis-charts', 'n_clicks')],
+            [State({'type': 'emojis-group-name', 'index': ALL}, 'value'),
+             State({'type': 'emojis-group-dropdown', 'index': ALL}, 'value')],
             prevent_initial_call=True
             # background=True
         )(self.build_chart_figure_callback)
         callback(
-            Output("emojis-dropdown-container-div", "children"),
-            Input("add-emojis-group-btn", "n_clicks")
+            Output('emojis-dropdown-container-div', 'children'),
+            Input('add-emojis-group-btn', 'n_clicks')
             # background=True
         )(self.display_dropdowns)
 
@@ -66,7 +65,7 @@ class MessageEmojisChartsComponent(BaseDashboardComponent):
             [
                 html.Div(
                     [
-                        html.Button("Add group", id="add-emojis-group-btn", n_clicks=0,
+                        html.Button('Add group', id='add-emojis-group-btn', n_clicks=0,
                                     style={'display': 'flex'}),
                         dcc.Loading(
                             id='loading-message-emojis-charts',
@@ -84,7 +83,7 @@ class MessageEmojisChartsComponent(BaseDashboardComponent):
                     className='btn-group'
                 ),
                 html.Div(
-                    id="emojis-dropdown-container-div",
+                    id='emojis-dropdown-container-div',
                     children=[],
                     style={'display': 'flex', 'gap': '10px', 'flex-wrap': 'wrap'}
                 ),
@@ -98,14 +97,14 @@ class MessageEmojisChartsComponent(BaseDashboardComponent):
         patched_children = Patch()
         new_dropdown = html.Div([
                 dcc.Input(
-                    id={"type": "emojis-group-name", "index": n_clicks},
+                    id={"type": 'emojis-group-name', 'index': n_clicks},
                     placeholder='Enter group name',
                     type='text',
                     style={'display': 'flex'}
                 ),
                 dcc.Dropdown(
                     self.all_emojis_options, [],
-                    id={"type": "emojis-group-dropdown", "index": n_clicks},
+                    id={"type": 'emojis-group-dropdown', 'index': n_clicks},
                     multi=True,
                 )
             ],
@@ -134,16 +133,14 @@ class MessageEmojisChartsComponent(BaseDashboardComponent):
         categories_count = grouped_by_categories_df['id']
         labels = grouped_by_categories_df['category']
 
-        # plt.pie(categories_count, labels=labels, autopct='%1.1f%%', startangle=90)
-
         return {
-            "data": [go.Pie(labels=labels, values=categories_count)],
-            "layout": {
-                "margin": dict(l=20, r=20, t=20, b=20),
-                "showlegend": True,
-                "paper_bgcolor": "rgba(0,0,0,0)",
-                "plot_bgcolor": "rgba(0,0,0,0)",
-                "font": {"color": "white"},
-                "autosize": True,
+            'data': [go.Pie(labels=labels, values=categories_count)],
+            'layout': {
+                'margin': dict(l=20, r=20, t=20, b=20),
+                'showlegend': True,
+                'paper_bgcolor': 'rgba(0,0,0,0)',
+                'plot_bgcolor': 'rgba(0,0,0,0)',
+                'font': {'color': 'white'},
+                'autosize': True,
             }
         }
