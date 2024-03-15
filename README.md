@@ -31,7 +31,7 @@ Telegram Analytic Dashboard is a web-based tool that allows users to analyze the
   3. `docker-compose up -d`;
 
 ### **Usage**
-  - Dashboard (http://localhost:8051/) - Here you first at all run first scraping:
+  - Dashboard (http://localhost:8051/) - First you need to run data collection for the channels you want:
     - Click the button at the top right of the screen `RUN SCRAPING FOR(N) CHANNELS`;
     - Now you need to authorize at telegram so enter code what you received from telegram;
     - After this you need to click again on `RUN SCRAPING FOR(N) CHANNELS` button;
