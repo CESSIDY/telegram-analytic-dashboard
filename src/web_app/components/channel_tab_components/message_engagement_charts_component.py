@@ -26,9 +26,16 @@ class MessageEngagementChartsComponent(BaseDashboardComponent):
             children=[
                 generate_section_banner('Message Engagement Trends Over Time'),
                 self.build_interacted_components(),
+
                 dcc.Graph(
                     id='message-engagement-linechart',
-                    figure=go.Figure(self.build_chart_figure())
+                    figure=go.Figure(self.build_chart_figure()),
+                    className='message-engagement-linechart'
+                ),
+                dcc.Graph(
+                    id='messages-count-linechart',
+                    figure=go.Figure(self.build_messages_count_chart_figure()),
+                    className='messages-count-linechart'
                 )
             ],
         )
@@ -36,6 +43,7 @@ class MessageEngagementChartsComponent(BaseDashboardComponent):
     def set_callbacks(self):
         callback(
             [Output('message-engagement-linechart', 'figure'),
+             Output('messages-count-linechart', 'figure'),
              Output('loading-message-engagement-charts-output', 'children')],
             [Input('build-message-engagement-charts', 'n_clicks')],
             [State('chart-panel-columns-checklist', 'value'),
@@ -44,7 +52,9 @@ class MessageEngagementChartsComponent(BaseDashboardComponent):
         )(self.build_chart_figure_callback)
 
     def build_chart_figure_callback(self, n_click, included_columns, is_group_by_date):
-        return self.build_chart_figure(n_click, included_columns, is_group_by_date), None
+        return (self.build_chart_figure(n_click, included_columns, is_group_by_date),
+                self.build_messages_count_chart_figure(n_click),
+                None)
 
     def build_interacted_components(self):
         return html.Div(
@@ -114,9 +124,11 @@ class MessageEngagementChartsComponent(BaseDashboardComponent):
         if is_group_by_date:
             messages_df = self.messages_df.groupby(['date'])[included_columns].mean().reset_index()
             x = messages_df['date'].values.tolist()
+            x_column_title = 'Date'
         else:
             messages_df = self.messages_df
             x = list(range(len(self.messages_df)))
+            x_column_title = 'Message'
         charts_data = []
         for column in included_columns:
             chart = {
@@ -132,12 +144,57 @@ class MessageEngagementChartsComponent(BaseDashboardComponent):
             "layout": {
                 "paper_bgcolor": "rgba(0,0,0,0)",
                 "plot_bgcolor": "rgba(0,0,0,0)",
-                "xaxis": dict(
-                    showline=False, showgrid=False, zeroline=False
-                ),
-                "yaxis": dict(
-                    showgrid=False, showline=False, zeroline=False
-                ),
+                "xaxis": {
+                    "zeroline": False,
+                    "showgrid": False,
+                    "title": x_column_title,
+                    "showline": False,
+                    #"domain": [0, 0.8],
+                    "titlefont": {"color": "darkgray"},
+                },
+                "yaxis": {
+                    "title": 'Users count',
+                    "showgrid": False,
+                    "showline": False,
+                    "zeroline": False,
+                    "titlefont": {"color": "darkgray"},
+                },
+                "autosize": True,
+            },
+        }
+
+    def build_messages_count_chart_figure(self, n_click=1):
+        if n_click <= 0:
+            raise PreventUpdate
+
+        messages_df = self.messages_df.groupby(['date'])['id'].count().reset_index()
+        messages_df.rename({'id': 'count'}, axis=1, inplace=True)
+
+        return {
+            "data": [{
+                "x": messages_df['date'].tolist(),
+                "y": messages_df['count'].tolist(),
+                "mode": "lines+markers",
+                "name": 'Messages count per day',
+            }],
+            "layout": {
+                "paper_bgcolor": "rgba(0,0,0,0)",
+                "plot_bgcolor": "rgba(0,0,0,0)",
+                "xaxis": {
+                    "zeroline": False,
+                    "showgrid": False,
+                    "title": "Date",
+                    "showline": False,
+                    #"domain": [0, 0.8],
+                    "titlefont": {"color": "darkgray"},
+                },
+                "yaxis": {
+                    "title": 'Message count',
+                    "showgrid": False,
+                    "showline": False,
+                    "zeroline": False,
+                    "titlefont": {"color": "darkgray"},
+                },
                 "autosize": True,
             },
         }

@@ -901,7 +901,27 @@ body {
 }
 
 
-/* emoji */
+/* messages engagement charts */
+
+.messages-linecharts-container{
+  display: flex;
+  flex-wrap: wrap;
+  width: 100%;
+}
+
+.message-engagement-linechart{
+  display: flex;
+  flex-wrap: wrap;
+  width: 100%;
+}
+
+.messages-count-linechart{
+  display: flex;
+  flex-wrap: wrap;
+  width: 100%;
+}
+
+/* emojis charts */
 
 .emoji_interacted_container{
   display: flex;
@@ -926,7 +946,6 @@ body {
 }
 
 .dash-dropdown{
-
 }
 
 /* WordCloud */

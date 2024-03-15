@@ -27,8 +27,8 @@ Telegram Analytic Dashboard is a web-based tool that allows users to analyze the
 
 ### **Running (After all configurations)**
   1. go to the project directory;
-  2. `docker-compose build --force-rm`;
-  3. `docker-compose up -d`;
+  2. run: `docker-compose build --force-rm`;
+  3. run: `docker-compose up -d`;
 
 ### **Usage**
   - Dashboard (http://localhost:8051/) - First you need to run data collection for the channels you want:
