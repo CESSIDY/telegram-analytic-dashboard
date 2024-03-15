@@ -19,7 +19,8 @@ from .components.page_components import (ChannelTabsComponent, BannerComponent, 
                                          MainAppComponent, TelegramAccountAuthComponent)
 from .components.channel_tab_components import (ChannelTabDashboardManager,
                                                 MessageEngagementChartsComponent,
-                                                MessageEmojisChartsComponent)
+                                                MessageEmojisChartsComponent,
+                                                MessageWordCloudChartsComponent)
 
 logger = logging.getLogger(__name__)
 
@@ -42,8 +43,9 @@ scraper = Scraper(db_handler, channels_loader)
 
 channel_tab_dashboard_manager = ChannelTabDashboardManager(db_handler).add_components(
     [
-        MessageEngagementChartsComponent(),#TODO: Maybe add component_name here
+        MessageEngagementChartsComponent(),  # TODO: Maybe add component_name here
         MessageEmojisChartsComponent(),
+        MessageWordCloudChartsComponent(),
     ]
 )
 
