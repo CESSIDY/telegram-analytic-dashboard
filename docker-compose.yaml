@@ -7,7 +7,7 @@ volumes:
     driver: local
 
 services:
-  python:
+  dashboard:
     build:
       context: .
       dockerfile: ./docker/python/Dockerfile
