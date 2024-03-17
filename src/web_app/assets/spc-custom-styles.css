@@ -915,10 +915,23 @@ body {
   width: 100%;
 }
 
-.messages-count-linechart{
-  display: flex;
-  flex-wrap: wrap;
-  width: 100%;
+/* display: grid */
+.message-engagement-all-graph-container {
+    display: grid;
+    grid-template-columns: 60% 40%;
+}
+
+.message-engagement-two-graph-container {
+    display: grid;
+    grid-template-rows: auto auto;
+}
+
+.message-engagement-linechart, .messages-count-linechart {
+    width: 100%;
+}
+
+.users-actions-by-month-barchart {
+    width: 100%;
 }
 
 /* emojis charts */
