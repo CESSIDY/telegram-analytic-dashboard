@@ -34,6 +34,7 @@ class ChannelTabsComponent(BaseComponent):
         return [html.Div(
             id="status-container",
             children=self.channel_tab_dashboard_manager.set_channel(channel_id).build_components(),
+            className="channel-tab-container"
         )]
 
     def build_channels_tabs(self):
