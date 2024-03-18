@@ -31,6 +31,8 @@ class Scraper(AuthScraper):
                 await self.scrape_and_store_comments_to_message(channel, message.id)
 
     async def scrape_and_store_comments_to_message(self, channel, message_id):
+        if self.COMMENTS_LIMIT <= 0:
+            return
         async for comments_chunk in self.get_comments_to_message(channel, message_id):
             for comment in comments_chunk:
                 self.db_handler.store_comment(channel.id, message_id, comment.id, comment.to_json())

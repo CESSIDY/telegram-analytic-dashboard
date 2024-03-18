@@ -45,6 +45,7 @@ class MessageWordCloudChartsComponent(BaseDashboardComponent):
         )(self.build_wc_image)
 
     def build_interacted_components(self):
+        # TODO: Add date pick range !!!!!!!!!!!!!!!!
         return html.Div(
             [
                 dcc.Loading(

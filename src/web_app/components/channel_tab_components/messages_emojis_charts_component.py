@@ -149,8 +149,14 @@ class MessageEmojisChartsComponent(BaseDashboardComponent):
         categories_count = grouped_by_categories_df['id']
         labels = grouped_by_categories_df['category']
 
+        colors = self.DEFAULT_COLORS
+        if len(self.DEFAULT_COLORS) > len(labels):
+            colors = self.DEFAULT_COLORS[:len(labels)]
+        elif len(self.DEFAULT_COLORS) < len(labels):
+            colors = [self.DEFAULT_COLORS[i % len(self.DEFAULT_COLORS)] for i in range(len(labels))]
+
         return {
-            'data': [go.Pie(labels=labels, values=categories_count)],
+            'data': [go.Pie(labels=labels, values=categories_count, marker=dict(colors=colors))],
             'layout': {
                 'margin': dict(l=20, r=20, t=20, b=20),
                 'showlegend': True,
