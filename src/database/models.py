@@ -62,13 +62,15 @@ class Message(BaseMessage, Document):
 
         last_update_datetime = self.get_content_datetime()
         last_update_date = last_update_datetime.date()
-        last_update_date_month = last_update_datetime.strftime("%B")
+        last_update_date_month = last_update_datetime.strftime("%b")
+        last_update_date_month_number = last_update_datetime.strftime("%m")
         message_dict = {
             "id": self.message_id,
             "channel_id": self.chat_id,
             "datetime": last_update_datetime,
             "date": last_update_date,
             "month": last_update_date_month,
+            "month_number": last_update_date_month_number,
             "message": content.get('message'),
             "views": int(content.get('views', 0)),
             "forwards": int(content.get('forwards', 0)),

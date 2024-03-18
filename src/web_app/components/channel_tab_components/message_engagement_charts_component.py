@@ -4,7 +4,6 @@ from dash import html, dcc, callback, Output, Input, State
 import dash_bootstrap_components as dbc
 from dash.exceptions import PreventUpdate
 import plotly.graph_objs as go
-from plotly.subplots import make_subplots
 from pandas import DataFrame
 import numpy as np
 
@@ -156,6 +155,7 @@ class MessageEngagementChartsComponent(BaseDashboardComponent):
         for i, column in enumerate(included_columns):
             y = messages_df[column].values.tolist()
             mean_y = np.mean(y)
+            mean_y_formatted = '{:,.0f}'.format(int(mean_y))
             mean_line = [mean_y] * len(x)
             chart = {
                 "x": x,
@@ -175,7 +175,7 @@ class MessageEngagementChartsComponent(BaseDashboardComponent):
             charts_data.append(chart)
             charts_data.append(mean_line)
 
-            annotation = dict(x=x[-1], y=mean_y, text=f"Mean: {int(mean_y)}", showarrow=False,
+            annotation = dict(x=x[-1], y=mean_y, text=f" {mean_y_formatted}", showarrow=False,
                               xanchor='left', yanchor='middle', valign='middle', xref='x', yref='y', align='left',
                               font={"color": self.DEFAULT_COLORS[i], "size": self.TICK_FONT_SIZE})
             annotations.append(annotation)
@@ -218,6 +218,7 @@ class MessageEngagementChartsComponent(BaseDashboardComponent):
         y = messages_df['count'].tolist()
 
         mean_y = np.mean(y)
+        mean_y_formatted = '{:,.0f}'.format(int(mean_y))
         mean_line = [mean_y] * len(x)
 
         return {
@@ -256,7 +257,7 @@ class MessageEngagementChartsComponent(BaseDashboardComponent):
                 },
                 "legend": {"font": {"size": self.TICK_FONT_SIZE, "color": self.TICK_FONT_COLOR}},
                 "autosize": True,
-                "annotations": [dict(x=x[-1], y=mean_y, text=f"Mean: {int(mean_y)}", showarrow=False,
+                "annotations": [dict(x=x[-1], y=mean_y, text=f" {mean_y_formatted}", showarrow=False,
                                    xanchor='left', yanchor='middle', valign='middle', xref='x', yref='y', align='left',
                                    font={"color":  self.DEFAULT_COLORS[0], "size": self.TICK_FONT_SIZE})]
             },
@@ -266,33 +267,38 @@ class MessageEngagementChartsComponent(BaseDashboardComponent):
         if not included_columns:
             included_columns = self.DEFAULT_INCLUDED_COLUMNS
 
-        messages_df = self.messages_df.groupby(['month'])[list(included_columns)].sum().reset_index()
-        df_melted = messages_df.melt(id_vars=['month'], value_vars=list(included_columns), var_name='actions',
+        messages_df = self.messages_df.groupby(['month', 'month_number'])[list(included_columns)].sum().reset_index()
+        df_melted = messages_df.melt(id_vars=['month', 'month_number'], value_vars=list(included_columns), var_name='actions',
                                      value_name='users_count')
 
+        df_melted = df_melted.sort_values('month_number', ascending=False)
         unique_actions = df_melted['actions'].unique()
         charts_data = []
         annotations = []
 
         for i, action in enumerate(unique_actions):
             filtered_df = df_melted[df_melted['actions'] == action]
-            x = filtered_df['users_count'].tolist()
-            y = filtered_df['month'].tolist()
+            x: list = filtered_df['users_count'].tolist()
+            y: list = filtered_df['month'].tolist()
 
             bar_chart = go.Bar(x=x, y=y, orientation="h", name=action, marker={"color": self.DEFAULT_COLORS[i]})
             charts_data.append(bar_chart)
 
             mean_x = np.mean(x)  # mean
+            mean_x_formatted = '{:,.0f}'.format(int(mean_x))
+
+            y.insert(0, "")
             mean_line_x = [mean_x] * len(y)
+
             mean_line = go.Scatter(x=mean_line_x,
                                    y=y,
                                    mode="lines", name=f"{action}-mean",
                                    line={"color": self.DEFAULT_COLORS[i], "dash": "dash"})
             charts_data.append(mean_line)
 
-            annotation = dict(x=mean_x, y=y[-1], text=f"Mean: {int(mean_x)}", showarrow=False,
+            annotation = dict(x=mean_x, y=len(y)-1.2, text=f" {mean_x_formatted}", showarrow=False,
                               xanchor='left', yanchor='middle', valign='middle', xref='x', yref='y',
-                              textangle=-90, align='left',
+                              textangle=90, align='left',
                               font={"color": self.DEFAULT_COLORS[i], "size": self.TICK_FONT_SIZE})
             annotations.append(annotation)
 
@@ -313,7 +319,7 @@ class MessageEngagementChartsComponent(BaseDashboardComponent):
                 "showgrid": False,
                 "showline": False,
                 "zeroline": False,
-                "tickangle": -90,
+                "tickangle": 90,
                 "tickfont": {"size": self.TICK_FONT_SIZE, "color": self.TICK_FONT_COLOR},
                 "titlefont": {"size": self.TITLE_FONT_SIZE, "color": self.TITLE_FONT_COLOR},
             },
