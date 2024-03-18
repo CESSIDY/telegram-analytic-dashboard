@@ -61,9 +61,8 @@ telegram_account_auth_component = TelegramAccountAuthComponent(scraper=scraper, 
 
 scrapers_actions_components = ScrapersActionsComponent(channels_tabs_component, telegram_account_auth_component)
 
+app.layout = html.Div(id='main-app-component', children=[main_app_component.build()])
+
 
 def run_server():
     app.run_server(debug=settings.DASH_DEBUG, port=settings.DASH_PORT)
-
-
-app.layout = html.Div(id='main-app-component', children=[main_app_component.build()])

@@ -918,7 +918,7 @@ body {
 /* display: grid */
 .message-engagement-all-graph-container {
     display: grid;
-    grid-template-columns: 60% 40%;
+    grid-template-columns: 70% 30%;
 }
 
 .message-engagement-two-graph-container {
