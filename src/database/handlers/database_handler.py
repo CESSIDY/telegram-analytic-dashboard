@@ -13,6 +13,7 @@ class DatabaseHandler(BaseDatabaseHandler):
 
     def __init__(self):
         connect_to_database()
+        self.message_index = 1
 
     def store_channel(self, channel_id, chat_name, content):
         existing_channel = Channel.objects(chat_id=channel_id).first()
@@ -28,7 +29,8 @@ class DatabaseHandler(BaseDatabaseHandler):
             logger.debug(f"Channel ({channel_id}) already exists.")
 
     def store_message(self, channel_id, message_id, content):
-        existing_message = Message.objects(message_id=message_id).first()
+        # TODO FIX
+        existing_message = Message.objects(chat_id=channel_id, message_id=message_id).first()
 
         if not existing_message:
             message = Message(chat_id=channel_id, message_id=message_id, content=content, timestamp=datetime.now())
@@ -39,9 +41,10 @@ class DatabaseHandler(BaseDatabaseHandler):
             existing_message.content = content
             existing_message.save()
             logger.debug(f"Message (chat_id={channel_id}, message_id={message_id}) already exists.")
+        self.message_index += 1
 
     def store_comment(self, channel_id, message_id, comment_id, content):
-        existing_comment = Comment.objects(comment_id=comment_id).first()
+        existing_comment = Comment.objects(chat_id=channel_id, comment_id=comment_id).first()
 
         if not existing_comment:
             comment = Comment(chat_id=channel_id, message_id=message_id, comment_id=comment_id,
@@ -62,8 +65,8 @@ class DatabaseHandler(BaseDatabaseHandler):
         messages = Message.objects(chat_id=channel_id).all()
         return messages
 
-    def get_comments_by_message_id(self, message_id):
-        comments = Comment.objects(message_id=message_id).all()
+    def get_comments_by_message_id(self, message_id, channel_id):
+        comments = Comment.objects(chat_id=channel_id, message_id=message_id).all()
         return comments
 
     def get_comments_by_channel_id(self, channel_id):

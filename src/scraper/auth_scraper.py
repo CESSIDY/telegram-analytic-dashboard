@@ -87,7 +87,6 @@ class AuthScraper(BaseScraper):
         return bool(me is not None)
 
     def send_code_request(self):
-        # TODO: catch Exception when code was already send and before login user try do this again
         result = self.client.send_code_request(settings.TELEGRAM_PHONE)
         if result:
             self.phone_code_hash = result.phone_code_hash

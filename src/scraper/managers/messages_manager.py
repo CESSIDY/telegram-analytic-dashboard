@@ -17,7 +17,6 @@ class MessagesManager:
 
     async def iter_messages(self, channel, limit=10, offset_msg_id=0, reply_to=None) -> Generator[List[Message], None, None]:
         total_messages = 0
-
         while total_messages < limit:
             try:
                 messages = await self.client.get_messages(

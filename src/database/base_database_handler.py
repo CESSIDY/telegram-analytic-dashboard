@@ -27,7 +27,7 @@ class BaseDatabaseHandler(ABC):
         pass
 
     @abstractmethod
-    def get_comments_by_message_id(self, message_id) -> List[Comment]:
+    def get_comments_by_message_id(self, message_id, channel_id) -> List[Comment]:
         pass
 
     @abstractmethod

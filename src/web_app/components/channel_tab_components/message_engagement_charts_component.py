@@ -296,7 +296,7 @@ class MessageEngagementChartsComponent(BaseDashboardComponent):
                                    line={"color": self.DEFAULT_COLORS[i], "dash": "dash"})
             charts_data.append(mean_line)
 
-            annotation = dict(x=mean_x, y=len(y)-1.2, text=f" {mean_x_formatted}", showarrow=False,
+            annotation = dict(x=mean_x, y=len(y)-1, text=f" {mean_x_formatted}", showarrow=False,
                               xanchor='left', yanchor='middle', valign='middle', xref='x', yref='y',
                               textangle=90, align='left',
                               font={"color": self.DEFAULT_COLORS[i], "size": self.TICK_FONT_SIZE})

@@ -1,3 +1,2 @@
 from .base_channels_loader import BaseChannelsLoader
-from .list_channels_loader import ListChannelsLoader
 from .json_channels_loader import JsonChannelsLoader

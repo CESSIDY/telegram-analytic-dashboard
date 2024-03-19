@@ -6,7 +6,7 @@ from mongoengine import Document, StringField, DateTimeField, IntField
 
 
 class Channel(Document):
-    chat_id = IntField(required=True)
+    chat_id = IntField(required=True, unique=True)
     name = StringField(required=True)
     content = StringField(required=True)
     timestamp = DateTimeField(default=datetime.now, required=True)
@@ -24,10 +24,10 @@ class Channel(Document):
 
 
 class BaseMessage:
-    chat_id = IntField(required=True)
-    message_id = IntField(required=True)
-    content = StringField(required=True)
-    timestamp = DateTimeField(default=datetime.now, required=True)
+    chat_id = IntField(required=True, unique=False)
+    message_id = IntField(required=True, unique=False)
+    content = StringField(required=True, unique=False)
+    timestamp = DateTimeField(default=datetime.now, required=True, unique=False)
 
     def get_content(self) -> Dict:
         return json.loads(self.content)
@@ -85,7 +85,7 @@ class Message(BaseMessage, Document):
 class Comment(BaseMessage, Document):
     # chat = ReferenceField(Channel)
     # message = ReferenceField(Message)
-    comment_id = IntField(required=True, unique=True)
+    comment_id = IntField(required=True, unique=False)
 
     def to_dict_for_analysis(self) -> Dict:
         content = self.get_content()
