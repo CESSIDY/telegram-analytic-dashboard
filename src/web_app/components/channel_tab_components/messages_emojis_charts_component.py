@@ -4,6 +4,7 @@ from dash import html, dcc, callback, Output, Input, State, Patch, ALL
 import dash_bootstrap_components as dbc
 from dash.exceptions import PreventUpdate
 import plotly.graph_objs as go
+from plotly.graph_objs.layout import Annotation
 from pandas import DataFrame
 import numpy as np
 
@@ -211,10 +212,9 @@ class MessageEmojisChartsComponent(BaseDashboardComponent):
                                line={'color': self.DEFAULT_COLORS[current_color_index]})
             mean_line = go.Scatter(x=dates, y=mean_line_y, mode='lines', name=f'{category}-mean',
                                    line={"color": self.DEFAULT_COLORS[current_color_index], "dash": "dash"})
-            annotation = go.Annotation(x=dates[0], y=mean_y, text=f" {mean_y_formatted}", showarrow=False,
-                                       xanchor='left', yanchor='middle', valign='middle', xref='x', yref='y',
-                                       align='left', font={"color": self.DEFAULT_COLORS[current_color_index],
-                                                           "size": self.TICK_FONT_SIZE})
+            annotation = Annotation(x=dates[0], y=mean_y, text=f" {mean_y_formatted}", showarrow=False, xanchor='left',
+                                    yanchor='middle', valign='middle', xref='x', yref='y', align='left',
+                                    font={"color": self.DEFAULT_COLORS[current_color_index], "size": self.TICK_FONT_SIZE})
             charts_data.append(chart)
             charts_data.append(mean_line)
             annotations.append(annotation)

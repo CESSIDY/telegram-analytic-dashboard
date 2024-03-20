@@ -4,6 +4,7 @@ from dash import html, dcc, callback, Output, Input, State
 import dash_bootstrap_components as dbc
 from dash.exceptions import PreventUpdate
 import plotly.graph_objs as go
+from plotly.graph_objs.layout import Annotation
 from pandas import DataFrame
 import numpy as np
 
@@ -162,9 +163,9 @@ class MessageEngagementChartsComponent(BaseDashboardComponent):
                                line={"color": self.DEFAULT_COLORS[i]})
             mean_line = go.Scatter(x=x, y=mean_line, mode="lines", name=f"{column}-mean",
                                    line={"color": self.DEFAULT_COLORS[i], "dash": "dash"})
-            annotation = go.Annotation(x=x[-1], y=mean_y, text=f" {mean_y_formatted}", showarrow=False, xanchor='left',
-                                       yanchor='middle', valign='middle', xref='x', yref='y', align='left',
-                                       font={"color": self.DEFAULT_COLORS[i], "size": self.TICK_FONT_SIZE})
+            annotation = Annotation(x=x[-1], y=mean_y, text=f" {mean_y_formatted}", showarrow=False, xanchor='left',
+                                    yanchor='middle', valign='middle', xref='x', yref='y', align='left',
+                                    font={"color": self.DEFAULT_COLORS[i], "size": self.TICK_FONT_SIZE})
 
             charts_data.append(chart)
             charts_data.append(mean_line)
@@ -242,9 +243,9 @@ class MessageEngagementChartsComponent(BaseDashboardComponent):
             },
             "legend": {"font": {"size": self.TICK_FONT_SIZE, "color": self.TICK_FONT_COLOR}},
             "autosize": True,
-            "annotations": [dict(x=x[-1], y=mean_y, text=f" {mean_y_formatted}", showarrow=False,
-                               xanchor='left', yanchor='middle', valign='middle', xref='x', yref='y', align='left',
-                               font={"color":  self.DEFAULT_COLORS[0], "size": self.TICK_FONT_SIZE})]
+            "annotations": [Annotation(x=x[-1], y=mean_y, text=f" {mean_y_formatted}", showarrow=False, xanchor='left',
+                                       yanchor='middle', valign='middle', xref='x', yref='y', align='left',
+                                       font={"color":  self.DEFAULT_COLORS[0], "size": self.TICK_FONT_SIZE})]
         }
 
         fig = go.Figure(data=[line_plot, mean_line], layout=layout)
@@ -278,16 +279,12 @@ class MessageEngagementChartsComponent(BaseDashboardComponent):
             y.insert(0, "")
             mean_line_x = [mean_x] * len(y)
 
-            mean_line = go.Scatter(x=mean_line_x,
-                                   y=y,
-                                   mode="lines", name=f"{action}-mean",
+            mean_line = go.Scatter(x=mean_line_x, y=y, mode="lines", name=f"{action}-mean",
                                    line={"color": self.DEFAULT_COLORS[i], "dash": "dash"})
+            annotation = Annotation(x=mean_x, y=len(y)-1, text=f" {mean_x_formatted}", showarrow=False, xanchor='left',
+                                    yanchor='middle', valign='middle', xref='x', yref='y', textangle=90, align='left',
+                                    font={"color": self.DEFAULT_COLORS[i], "size": self.TICK_FONT_SIZE})
             charts_data.append(mean_line)
-
-            annotation = dict(x=mean_x, y=len(y)-1, text=f" {mean_x_formatted}", showarrow=False,
-                              xanchor='left', yanchor='middle', valign='middle', xref='x', yref='y',
-                              textangle=90, align='left',
-                              font={"color": self.DEFAULT_COLORS[i], "size": self.TICK_FONT_SIZE})
             annotations.append(annotation)
 
         layout = {
