@@ -44,11 +44,11 @@ class MessageEmojisChartsComponent(BaseDashboardComponent):
                 html.Div([
                     dcc.Graph(
                         id='message-emojis-linechart',
-                        figure=go.Figure(self.build_linechart_figure())
+                        figure=self.build_linechart_figure()
                     ),
                     dcc.Graph(
                         id='message-emojis-piechart',
-                        figure=go.Figure(self.build_chart_figure())
+                        figure=self.build_chart_figure()
                     )
                 ], className='emojis-all-graph-container')
             ],
@@ -71,9 +71,12 @@ class MessageEmojisChartsComponent(BaseDashboardComponent):
             # background=True
         )(self.display_dropdowns)
 
-    def build_chart_figure_callback(self, n_click, emojis_groups_names, emojis_groups_dropdowns):
-        return (self.build_chart_figure(n_click, emojis_groups_names, emojis_groups_dropdowns),
-                self.build_linechart_figure(n_click, emojis_groups_names, emojis_groups_dropdowns),
+    def build_chart_figure_callback(self, n_clicks, emojis_groups_names, emojis_groups_dropdowns):
+        if n_clicks <= 0:
+            raise PreventUpdate
+
+        return (self.build_chart_figure(emojis_groups_names, emojis_groups_dropdowns),
+                self.build_linechart_figure(emojis_groups_names, emojis_groups_dropdowns),
                 None)
 
     def build_interacted_components(self):
@@ -129,10 +132,7 @@ class MessageEmojisChartsComponent(BaseDashboardComponent):
         patched_children.append(new_dropdown)
         return patched_children
 
-    def build_chart_figure(self, n_clicks=1, emojis_groups_names=(), emojis_groups_dropdowns=()):
-        if n_clicks <= 0:
-            raise PreventUpdate
-
+    def build_chart_figure(self, emojis_groups_names=(), emojis_groups_dropdowns=()):
         categories = {}
 
         if not emojis_groups_names and not emojis_groups_dropdowns:
@@ -155,23 +155,23 @@ class MessageEmojisChartsComponent(BaseDashboardComponent):
         elif len(self.DEFAULT_COLORS) < len(labels):
             colors = [self.DEFAULT_COLORS[i % len(self.DEFAULT_COLORS)] for i in range(len(labels))]
 
-        return {
-            'data': [go.Pie(labels=labels, values=categories_count, marker=dict(colors=colors))],
-            'layout': {
-                'margin': dict(l=20, r=20, t=20, b=20),
-                'showlegend': True,
-                'paper_bgcolor': 'rgba(0,0,0,0)',
-                'plot_bgcolor': 'rgba(0,0,0,0)',
-                'font': {"color": self.TITLE_FONT_COLOR, "size": self.TITLE_FONT_SIZE},
-                "legend": {"font": {"size": self.TICK_FONT_SIZE, "color": self.TICK_FONT_COLOR}},
-                'autosize': True,
-            }
+        pie_plot = go.Pie(labels=labels, values=categories_count, marker=dict(colors=colors))
+
+        layout = {
+            'margin': dict(l=20, r=20, t=20, b=20),
+            'showlegend': True,
+            'paper_bgcolor': 'rgba(0,0,0,0)',
+            'plot_bgcolor': 'rgba(0,0,0,0)',
+            'font': {"color": self.TITLE_FONT_COLOR, "size": self.TITLE_FONT_SIZE},
+            "legend": {"font": {"size": self.TICK_FONT_SIZE, "color": self.TICK_FONT_COLOR}},
+            'autosize': True,
         }
 
-    def build_linechart_figure(self, n_clicks=1, emojis_groups_names=(), emojis_groups_dropdowns=()):
-        if n_clicks <= 0:
-            raise PreventUpdate
+        fig = go.Figure(data=[pie_plot], layout=layout)
 
+        return fig
+
+    def build_linechart_figure(self, emojis_groups_names=(), emojis_groups_dropdowns=()):
         categories = {}
 
         if not emojis_groups_names and not emojis_groups_dropdowns:
@@ -207,51 +207,42 @@ class MessageEmojisChartsComponent(BaseDashboardComponent):
             mean_y = np.mean(y)
             mean_y_formatted = '{:,.0f}'.format(int(mean_y))
             mean_line_y = [mean_y] * len(dates)
-            chart = {
-                "x": dates,
-                "y": new_df[category],
-                "mode": "lines+markers",
-                "name": category,
-                "line": {"color": self.DEFAULT_COLORS[current_color_index]}
-            }
-            mean_line = {
-                "x": dates,
-                "y": mean_line_y,
-                "mode": "lines",
-                "name": f"{category}-mean",
-                "line": {"color": self.DEFAULT_COLORS[current_color_index], "dash": "dash"}
-            }
+            chart = go.Scatter(x=dates, y=new_df[category], mode='lines+markers', name=category,
+                               line={'color': self.DEFAULT_COLORS[current_color_index]})
+            mean_line = go.Scatter(x=dates, y=mean_line_y, mode='lines', name=f'{category}-mean',
+                                   line={"color": self.DEFAULT_COLORS[current_color_index], "dash": "dash"})
+            annotation = go.Annotation(x=dates[0], y=mean_y, text=f" {mean_y_formatted}", showarrow=False,
+                                       xanchor='left', yanchor='middle', valign='middle', xref='x', yref='y',
+                                       align='left', font={"color": self.DEFAULT_COLORS[current_color_index],
+                                                           "size": self.TICK_FONT_SIZE})
             charts_data.append(chart)
             charts_data.append(mean_line)
-
-            annotation = dict(x=dates[0], y=mean_y, text=f" {mean_y_formatted}", showarrow=False,
-                              xanchor='left', yanchor='middle', valign='middle', xref='x', yref='y', align='left',
-                              font={"color": self.DEFAULT_COLORS[current_color_index], "size": self.TICK_FONT_SIZE})
             annotations.append(annotation)
 
-        return {
-            "data": charts_data,
-            "layout": {
-                "paper_bgcolor": "rgba(0,0,0,0)",
-                "plot_bgcolor": "rgba(0,0,0,0)",
-                "xaxis": {
-                    "title": "Date",
-                    "zeroline": False,
-                    "showgrid": False,
-                    "showline": False,
-                    "tickfont": {"size": self.TICK_FONT_SIZE, "color": self.TICK_FONT_COLOR},
-                    "titlefont": {"color": self.TITLE_FONT_COLOR, "size": self.TITLE_FONT_SIZE},
-                },
-                "yaxis": {
-                    "title": 'Messages count',
-                    "showgrid": False,
-                    "showline": False,
-                    "zeroline": False,
-                    "tickfont": {"size": self.TICK_FONT_SIZE, "color": self.TICK_FONT_COLOR},
-                    "titlefont": {"color": self.TITLE_FONT_COLOR, "size": self.TITLE_FONT_SIZE},
-                },
-                "legend": {"font": {"size": self.TICK_FONT_SIZE, "color": self.TICK_FONT_COLOR}},
-                "autosize": True,
-                "annotations": annotations
+        layout = {
+            "paper_bgcolor": "rgba(0,0,0,0)",
+            "plot_bgcolor": "rgba(0,0,0,0)",
+            "xaxis": {
+                "title": "Date",
+                "zeroline": False,
+                "showgrid": False,
+                "showline": False,
+                "tickfont": {"size": self.TICK_FONT_SIZE, "color": self.TICK_FONT_COLOR},
+                "titlefont": {"color": self.TITLE_FONT_COLOR, "size": self.TITLE_FONT_SIZE},
             },
+            "yaxis": {
+                "title": 'Messages count',
+                "showgrid": False,
+                "showline": False,
+                "zeroline": False,
+                "tickfont": {"size": self.TICK_FONT_SIZE, "color": self.TICK_FONT_COLOR},
+                "titlefont": {"color": self.TITLE_FONT_COLOR, "size": self.TITLE_FONT_SIZE},
+            },
+            "legend": {"font": {"size": self.TICK_FONT_SIZE, "color": self.TICK_FONT_COLOR}},
+            "autosize": True,
+            "annotations": annotations
         }
+
+        fig = go.Figure(data=charts_data, layout=layout)
+
+        return fig

@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 class MessageEngagementChartsComponent(BaseDashboardComponent):
     MOST_RECENT_MESSAGE_OFFSET = 3  # TODO: Remove just messages for N last days (give user to decide)
     DEFAULT_INCLUDED_COLUMNS = ['views', 'forwards', 'reactions']
-    DEFAULT_COLORS = ['skyblue', 'green', 'orange', 'white', 'purple']  # Define custom colors for lines
+    DEFAULT_COLORS = ['skyblue', 'green', 'orange', 'white', 'purple']
     TITLE_FONT_COLOR = 'rgb(30,125,125)'
     TITLE_FONT_SIZE = 20
     TICK_FONT_COLOR = 'darkgray'
@@ -36,12 +36,12 @@ class MessageEngagementChartsComponent(BaseDashboardComponent):
                     html.Div([
                         dcc.Graph(
                             id='message-engagement-linechart',
-                            figure=go.Figure(self.build_chart_figure()),
+                            figure=self.build_chart_figure(),
                             className='message-engagement-linechart'
                         ),
                         dcc.Graph(
                             id='messages-count-linechart',
-                            figure=go.Figure(self.build_messages_count_chart_figure()),
+                            figure=self.build_messages_count_chart_figure(),
                             className='messages-count-linechart'
                         ),
                     ], className='message-engagement-two-graph-container'),
@@ -69,10 +69,13 @@ class MessageEngagementChartsComponent(BaseDashboardComponent):
             # background=True
         )(self.build_chart_figure_callback)
 
-    def build_chart_figure_callback(self, n_click, included_columns, is_group_by_date):
-        return (self.build_chart_figure(n_click, included_columns, is_group_by_date),
-                self.build_messages_count_chart_figure(n_click),
-                self.build_user_actions_by_month_chart_figure(n_click, included_columns),
+    def build_chart_figure_callback(self, n_clicks, included_columns, is_group_by_date):
+        if n_clicks <= 0:
+            raise PreventUpdate
+
+        return (self.build_chart_figure(included_columns, is_group_by_date),
+                self.build_messages_count_chart_figure(),
+                self.build_user_actions_by_month_chart_figure(included_columns),
                 None)
 
     def build_interacted_components(self):
@@ -135,10 +138,7 @@ class MessageEngagementChartsComponent(BaseDashboardComponent):
             className='auto__container',
         )
 
-    def build_chart_figure(self, n_click=1, included_columns=None, is_group_by_date=False):
-        if n_click <= 0:
-            raise PreventUpdate
-
+    def build_chart_figure(self, included_columns=None, is_group_by_date=False):
         if not included_columns:
             included_columns = self.DEFAULT_INCLUDED_COLUMNS
 
@@ -157,61 +157,49 @@ class MessageEngagementChartsComponent(BaseDashboardComponent):
             mean_y = np.mean(y)
             mean_y_formatted = '{:,.0f}'.format(int(mean_y))
             mean_line = [mean_y] * len(x)
-            chart = {
-                "x": x,
-                "y": y,
-                "mode": "lines+markers",
-                "name": column,
-                "line": {"color": self.DEFAULT_COLORS[i]}
-            }
-            mean_line = {
-                "x": x,
-                "y": mean_line,
-                "mode": "lines",
-                "name": f"{column}-mean",
-                "line": {"color": self.DEFAULT_COLORS[i], "dash": "dash"}
-            }
+
+            chart = go.Scatter(x=x, y=y, mode="lines+markers", name=column,
+                               line={"color": self.DEFAULT_COLORS[i]})
+            mean_line = go.Scatter(x=x, y=mean_line, mode="lines", name=f"{column}-mean",
+                                   line={"color": self.DEFAULT_COLORS[i], "dash": "dash"})
+            annotation = go.Annotation(x=x[-1], y=mean_y, text=f" {mean_y_formatted}", showarrow=False, xanchor='left',
+                                       yanchor='middle', valign='middle', xref='x', yref='y', align='left',
+                                       font={"color": self.DEFAULT_COLORS[i], "size": self.TICK_FONT_SIZE})
 
             charts_data.append(chart)
             charts_data.append(mean_line)
-
-            annotation = dict(x=x[-1], y=mean_y, text=f" {mean_y_formatted}", showarrow=False,
-                              xanchor='left', yanchor='middle', valign='middle', xref='x', yref='y', align='left',
-                              font={"color": self.DEFAULT_COLORS[i], "size": self.TICK_FONT_SIZE})
             annotations.append(annotation)
 
-        return {
-            "data": charts_data,
-            "layout": {
-                "paper_bgcolor": "rgba(0,0,0,0)",
-                "plot_bgcolor": "rgba(0,0,0,0)",
-                "xaxis": {
-                    "zeroline": False,
-                    "showgrid": False,
-                    "title": x_column_title,
-                    "showline": False,
-                    # "domain": [0, 0.8],
-                    "tickfont": {"size": self.TICK_FONT_SIZE, "color": self.TICK_FONT_COLOR},
-                    "titlefont": {"color": self.TITLE_FONT_COLOR, "size": self.TITLE_FONT_SIZE},
-                },
-                "yaxis": {
-                    "title": 'Actions count',
-                    "showgrid": False,
-                    "showline": False,
-                    "zeroline": False,
-                    "tickfont": {"size": self.TICK_FONT_SIZE, "color": self.TICK_FONT_COLOR},
-                    "titlefont": {"color": self.TITLE_FONT_COLOR, "size": self.TITLE_FONT_SIZE},
-                },
-                "legend": {"font": {"size": self.TICK_FONT_SIZE, "color": self.TICK_FONT_COLOR}},
-                "autosize": True,
-                "annotations": annotations
+        layout = {
+            "paper_bgcolor": "rgba(0,0,0,0)",
+            "plot_bgcolor": "rgba(0,0,0,0)",
+            "xaxis": {
+                "zeroline": False,
+                "showgrid": False,
+                "title": x_column_title,
+                "showline": False,
+                # "domain": [0, 0.8],
+                "tickfont": {"size": self.TICK_FONT_SIZE, "color": self.TICK_FONT_COLOR},
+                "titlefont": {"color": self.TITLE_FONT_COLOR, "size": self.TITLE_FONT_SIZE},
             },
+            "yaxis": {
+                "title": 'Actions count',
+                "showgrid": False,
+                "showline": False,
+                "zeroline": False,
+                "tickfont": {"size": self.TICK_FONT_SIZE, "color": self.TICK_FONT_COLOR},
+                "titlefont": {"color": self.TITLE_FONT_COLOR, "size": self.TITLE_FONT_SIZE},
+            },
+            "legend": {"font": {"size": self.TICK_FONT_SIZE, "color": self.TICK_FONT_COLOR}},
+            "autosize": True,
+            "annotations": annotations
         }
 
-    def build_messages_count_chart_figure(self, n_click=1):
-        if n_click <= 0:
-            raise PreventUpdate
+        fig = go.Figure(data=charts_data, layout=layout)
 
+        return fig
+
+    def build_messages_count_chart_figure(self):
         messages_df = self.messages_df.groupby(['date'])['id'].count().reset_index()
         messages_df.rename({'id': 'count'}, axis=1, inplace=True)
         x = messages_df['date'].tolist()
@@ -221,49 +209,49 @@ class MessageEngagementChartsComponent(BaseDashboardComponent):
         mean_y_formatted = '{:,.0f}'.format(int(mean_y))
         mean_line = [mean_y] * len(x)
 
-        return {
-            "data": [{
-                "x": x,
-                "y": y,
-                "mode": "lines+markers",
-                "name": 'Messages count per day',
-                "line": {"color": self.DEFAULT_COLORS[0]}
-            }, {
-                "x": x,
-                "y": mean_line,
-                "mode": "lines",
-                "name": f"messages-mean",
-                "line": {"dash": "dash", "color": self.DEFAULT_COLORS[0]}
-            }],
-            "layout": {
-                "paper_bgcolor": "rgba(0,0,0,0)",
-                "plot_bgcolor": "rgba(0,0,0,0)",
-                "xaxis": {
-                    "zeroline": False,
-                    "showgrid": False,
-                    "title": "Date",
-                    "showline": False,
-                    # "domain": [0, 0.8],
-                    "tickfont": {"size": self.TICK_FONT_SIZE, "color": self.TICK_FONT_COLOR},
-                    "titlefont": {"color": self.TITLE_FONT_COLOR, "size": self.TITLE_FONT_SIZE},
-                },
-                "yaxis": {
-                    "title": 'Message count',
-                    "showgrid": False,
-                    "showline": False,
-                    "zeroline": False,
-                    "tickfont": {"size": self.TICK_FONT_SIZE, "color": self.TICK_FONT_COLOR},
-                    "titlefont": {"color": self.TITLE_FONT_COLOR, "size": self.TITLE_FONT_SIZE},
-                },
-                "legend": {"font": {"size": self.TICK_FONT_SIZE, "color": self.TICK_FONT_COLOR}},
-                "autosize": True,
-                "annotations": [dict(x=x[-1], y=mean_y, text=f" {mean_y_formatted}", showarrow=False,
-                                   xanchor='left', yanchor='middle', valign='middle', xref='x', yref='y', align='left',
-                                   font={"color":  self.DEFAULT_COLORS[0], "size": self.TICK_FONT_SIZE})]
+        line_plot = go.Scatter(x=x,
+                               y=y,
+                               mode="lines+markers",
+                               name="Messages count per day",
+                               line={"color": self.DEFAULT_COLORS[0]})
+        mean_line = go.Scatter(x=x,
+                               y=mean_line,
+                               mode="lines",
+                               name="messages-mean",
+                               line={"dash": "dash", "color": self.DEFAULT_COLORS[0]})
+
+        layout = {
+            "paper_bgcolor": "rgba(0,0,0,0)",
+            "plot_bgcolor": "rgba(0,0,0,0)",
+            "xaxis": {
+                "zeroline": False,
+                "showgrid": False,
+                "title": "Date",
+                "showline": False,
+                # "domain": [0, 0.8],
+                "tickfont": {"size": self.TICK_FONT_SIZE, "color": self.TICK_FONT_COLOR},
+                "titlefont": {"color": self.TITLE_FONT_COLOR, "size": self.TITLE_FONT_SIZE},
             },
+            "yaxis": {
+                "title": 'Message count',
+                "showgrid": False,
+                "showline": False,
+                "zeroline": False,
+                "tickfont": {"size": self.TICK_FONT_SIZE, "color": self.TICK_FONT_COLOR},
+                "titlefont": {"color": self.TITLE_FONT_COLOR, "size": self.TITLE_FONT_SIZE},
+            },
+            "legend": {"font": {"size": self.TICK_FONT_SIZE, "color": self.TICK_FONT_COLOR}},
+            "autosize": True,
+            "annotations": [dict(x=x[-1], y=mean_y, text=f" {mean_y_formatted}", showarrow=False,
+                               xanchor='left', yanchor='middle', valign='middle', xref='x', yref='y', align='left',
+                               font={"color":  self.DEFAULT_COLORS[0], "size": self.TICK_FONT_SIZE})]
         }
 
-    def build_user_actions_by_month_chart_figure(self, n_click=1, included_columns=None):
+        fig = go.Figure(data=[line_plot, mean_line], layout=layout)
+
+        return fig
+
+    def build_user_actions_by_month_chart_figure(self, included_columns=None):
         if not included_columns:
             included_columns = self.DEFAULT_INCLUDED_COLUMNS
 

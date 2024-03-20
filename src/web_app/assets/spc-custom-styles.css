@@ -986,5 +986,6 @@ body {
   min-width: 240px;
 }
 
-.wc-date-picker{
+td.CalendarDay {
+  padding: 0;
 }
