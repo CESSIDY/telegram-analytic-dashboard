@@ -4,6 +4,9 @@
 ### **Description**
 
 Telegram Analytic Dashboard is a web-based tool that allows users to analyze their favorite Telegram channels using various graphical representations. Users can gain insights into channel activities, message trends, and more through intuitive visualizations.
+![dashboard-preview](https://github.com/CESSIDY/telegram-analytic-dashboard/assets/33484684/9c02a4e4-7ef2-40aa-831c-082c1ec2cf70)
+
+
 
 ## **Requirements**
 - Internet connection.
